@@ -1,6 +1,6 @@
 /*
  * CCO 4.0 — Central Administrativa do Game
- * ETAPA 17
+ * ETAPA 19
  *
  * Regra:
  * 1. TREINAMENTO: ADM recebe somente operador + pontuação.
@@ -328,9 +328,15 @@ setPhase('training');
    No treinamento, o ADM recebe apenas operador + pontuação.
    ========================================================================== */
 async function conectarFirebaseADM() {
-  if (!window.ccoFirebase || !window.ccoFirebase.ready) return;
+  if (!window.ccoFirebase || !window.ccoFirebase.ready) {
+    console.error('[CCO ADM] Firebase não foi inicializado.');
+    return;
+  }
   try {
-    await window.ccoFirebase.ready;
+    // A ADM também precisa estar autenticada antes de ler /operadores.
+    // O login é anônimo nesta etapa apenas para o teste de realtime.
+    const credential = await window.ccoFirebase.ready;
+    console.info('[CCO ADM] Autenticação Firebase concluída. UID:', credential.user?.uid || window.ccoFirebase.auth.currentUser?.uid);
 
     firebaseGameListener = window.ccoFirebase.db.ref('operadores');
     firebaseGameListener.on('value', snapshot => {
@@ -354,9 +360,12 @@ async function conectarFirebaseADM() {
       adminState.operators = next;
       adminState.points = [...next.values()].reduce((sum, op) => sum + Number(op.points || 0), 0);
       render();
+      console.info('[CCO ADM] Operadores recebidos do Firebase:', next.size);
+    }, error => {
+      console.error('[CCO ADM] Erro ao ouvir /operadores:', error);
     });
 
-    console.info('[CCO ADM] Firebase conectado.');
+    console.info('[CCO ADM] Firebase conectado e ouvindo /operadores.');
   } catch (error) {
     console.error('[CCO ADM] Falha ao conectar ao Firebase:', error);
   }
