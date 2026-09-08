@@ -876,6 +876,11 @@
   function adicionarNotificacaoSidebar(titulo, mensagem, ocorrencia = null) {
     const evento = criarEventoCCO(titulo, mensagem, ocorrencia);
     ccoEvents.unshift(evento);
+    publicarEventoGameFirebase({
+      type: 'CCO_EVENT_CREATED',
+      titulo: evento.titulo, mensagem: evento.mensagem,
+      criticidade: evento.severidade, origem: evento.origem, eventoId: evento.id
+    });
     if (currentTab === 'mod-cco-center') {
       evento.assumeDeadline = Date.now() + 60000;
     }
@@ -965,6 +970,7 @@
         evento.assumidoEm = null;
         gameState.pontuacao = Math.max(0, gameState.pontuacao - 50);
         atualizarPontuacaoUI();
+        publicarEventoGameFirebase({ type: 'CCO_TIMEOUT', resultado: 'timeout-assumir', correct: false, titulo: evento.titulo, eventoId: evento.id, points: -50, operador: gameState.operador });
         aplicarBloqueioOperador('Tempo esgotado para assumir a ocorrência.', evento.origemTab || 'mod-malha');
         atualizarBanner('Tempo esgotado para assumir a ocorrência. -50 pontos e bloqueio de 60 segundos.', '#ef4444');
         selectedCcoEventId = evento.id;
@@ -976,6 +982,7 @@
         evento.resultado = 'timeout-decisao';
         gameState.pontuacao = Math.max(0, gameState.pontuacao - 75);
         atualizarPontuacaoUI();
+        publicarEventoGameFirebase({ type: 'CCO_TIMEOUT', resultado: 'timeout-decisao', correct: false, titulo: evento.titulo, eventoId: evento.id, points: -75, operador: gameState.operador });
         atualizarBanner('Tempo esgotado para executar a decisão. -75 pontos.', '#ef4444');
         selectedCcoEventId = evento.id;
         houveMudancaDeStatus = true;
@@ -1180,6 +1187,12 @@
       aplicarBloqueioOperador('Decisão operacional inadequada.', evento.origemTab || 'mod-malha');
     }
 
+    publicarEventoGameFirebase({
+      type: 'CCO_DECISION_RESULT', resultado: evento.resultado,
+      correct: evento.resultado === 'acerto', titulo: evento.titulo,
+      eventoId: evento.id, points: evento.resultado === 'acerto' ? opcao.pontos : (opcao.penalidade || -50),
+      decisao: opcao.texto, origem: evento.origem
+    });
     selectedCcoEventId = evento.id;
     renderizarEventosCCO();
     atualizarStatusCentralCCO();
@@ -1451,6 +1464,14 @@
     };
     gameState.cardsAtivos.push(cardData);
     renderizarCardHTML(cardData);
+    publicarEventoGameFirebase({
+      type: 'GAME_EVENT_CREATED',
+      titulo: cardData.titulo,
+      criticidade: cardData.criticidade,
+      descricao: cardData.descricao,
+      origem: 'Game Oficial',
+      eventoId: cardData.id
+    });
   }
 
   function renderizarCardHTML(card) {
@@ -1536,10 +1557,20 @@
       gameState.pontuacao += opcao.pontos;
       atualizarPontuacaoUI();
       removerCardTela(cardId);
+      publicarEventoGameFirebase({
+        type: 'GAME_DECISION_RESULT', resultado: 'acerto', correct: true,
+        titulo: card.titulo, eventoId: card.id,
+        points: opcao.pontos, decisao: opcao.texto
+      });
     } else {
       gameState.pontuacao = Math.max(0, gameState.pontuacao + opcao.penalidade);
       atualizarPontuacaoUI();
       removerCardTela(cardId);
+      publicarEventoGameFirebase({
+        type: 'GAME_DECISION_RESULT', resultado: 'erro', correct: false,
+        titulo: card.titulo, eventoId: card.id,
+        points: opcao.penalidade, decisao: opcao.texto
+      });
       aplicarBloqueioOperador('Decisão Inadequada tomou rumo crítico na malha!');
     }
     gameState.cardsAtivos.splice(cardIndex, 1);
@@ -1554,8 +1585,13 @@
   function finalizarCardPorTimeout(cardId) {
     const cardIndex = gameState.cardsAtivos.findIndex(c => c.id === cardId);
     if (cardIndex !== -1) {
+      const card = gameState.cardsAtivos[cardIndex];
       removerCardTela(cardId);
       gameState.cardsAtivos.splice(cardIndex, 1);
+      publicarEventoGameFirebase({
+        type: 'GAME_TIMEOUT', resultado: 'timeout', correct: false,
+        titulo: card.titulo, eventoId: card.id, points: -50
+      });
       aplicarBloqueioOperador('Tempo Esgotado! Falha na tomada de decisão do CCO.');
     }
   }
@@ -1635,6 +1671,7 @@
     }
 
     atualizarBloqueioVisual();
+    publicarEventoGameFirebase({ type: 'OPERATOR_BLOCKED', motivo: motivo || 'Decisão operacional inadequada.', points: 0, tabId: alvo });
 
     if (bloqueioInterval) clearInterval(bloqueioInterval);
     bloqueioInterval = setInterval(() => {
@@ -1702,6 +1739,9 @@ document.addEventListener('DOMContentLoaded', () => {
    ========================================================================== */
 let firebaseSyncInterval = null;
 let firebaseOperatorKey = null;
+let firebaseGamePhase = 'training';
+let firebaseGameSessionId = null;
+let firebaseGameStatusListener = null;
 
 async function inicializarSincronizacaoFirebase() {
   if (!window.ccoFirebase || !window.ccoFirebase.ready) return;
@@ -1720,10 +1760,67 @@ async function inicializarSincronizacaoFirebase() {
 
     if (firebaseSyncInterval) clearInterval(firebaseSyncInterval);
     firebaseSyncInterval = setInterval(sincronizarOperadorFirebase, 2000);
+    escutarEstadoGameFirebase();
     console.info('[CCO 4.0] Firebase conectado. UID:', firebaseOperatorKey);
   } catch (error) {
     console.error('[CCO 4.0] Falha ao conectar ao Firebase:', error);
   }
+}
+
+async function publicarEventoGameFirebase(evento) {
+  if (!firebaseOperatorKey || !window.ccoFirebase || !firebaseGameSessionId || firebaseGamePhase !== 'official') return;
+  try {
+    const payload = {
+      ...evento,
+      operador: gameState.operador,
+      operadorNome: gameState.operador.split('@')[0],
+      operadorUid: firebaseOperatorKey,
+      timestamp: firebase.database.ServerValue.TIMESTAMP
+    };
+    await window.ccoFirebase.db.ref(`game/events/${firebaseGameSessionId}`).push(payload);
+  } catch (error) {
+    console.error('[CCO 4.0] Erro ao publicar evento oficial:', error);
+  }
+}
+
+function iniciarGameOficialLocal(sessionId) {
+  firebaseGamePhase = 'official';
+  firebaseGameSessionId = sessionId || firebaseGameSessionId || String(Date.now());
+  gameState.emExecucao = true;
+  sincronizarOperadorFirebase();
+
+  // Cards do Game Oficial são gerados no computador de cada operador.
+  // O ADM acompanha as ocorrências e decisões via Firebase.
+  if (!gameState.intervaloCards) iniciarGeradorDeIncidentes();
+  console.info('[CCO 4.0] GAME OFICIAL iniciado. Sessão:', firebaseGameSessionId);
+}
+
+function encerrarGameOficialLocal() {
+  firebaseGamePhase = 'training';
+  firebaseGameSessionId = null;
+  gameState.emExecucao = false;
+  if (gameState.intervaloCards) clearInterval(gameState.intervaloCards);
+  gameState.intervaloCards = null;
+  gameState.cardsAtivos = [];
+  const container = document.getElementById('game-cards-container');
+  if (container) container.innerHTML = '';
+  sincronizarOperadorFirebase();
+  console.info('[CCO 4.0] GAME OFICIAL encerrado.');
+}
+
+function escutarEstadoGameFirebase() {
+  if (!window.ccoFirebase || !window.ccoFirebase.db) return;
+  if (firebaseGameStatusListener) firebaseGameStatusListener.off();
+  firebaseGameStatusListener = window.ccoFirebase.db.ref('game');
+  firebaseGameStatusListener.on('value', snapshot => {
+    const game = snapshot.val() || {};
+    if (game.status === 'official') {
+      iniciarGameOficialLocal(game.sessionId || String(game.iniciadoEm || Date.now()));
+    } else {
+      if (firebaseGamePhase === 'official' || gameState.emExecucao) encerrarGameOficialLocal();
+      else sincronizarOperadorFirebase();
+    }
+  }, error => console.error('[CCO 4.0] Erro ao ouvir estado do Game:', error));
 }
 
 async function sincronizarOperadorFirebase() {
@@ -1739,7 +1836,7 @@ async function sincronizarOperadorFirebase() {
     email: gameState.operador,
     pontos: Number(gameState.pontuacao || 0),
     status: 'online',
-    fase: 'training',
+    fase: firebaseGamePhase,
     updatedAt: firebase.database.ServerValue.TIMESTAMP
   };
 

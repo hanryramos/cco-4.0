@@ -13,6 +13,8 @@
 
 const channel = new BroadcastChannel('trem_simulation_channel');
 let firebaseGameListener = null;
+let firebaseEventsListener = null;
+let currentSessionId = null;
 
 const adminState = {
   phase: 'training',
@@ -401,40 +403,113 @@ renderRanking = function() {
   });
 };
 
-// O estado oficial também passa a ser publicado no Firebase. Nesta etapa isso
-// serve como base; na próxima, os operadores ouvirão este estado para iniciar
-// o Game Oficial em computadores diferentes.
-const originalStartHandler = $('start').onclick;
-$('start').onclick = async () => {
-  if (window.ccoFirebase && window.ccoFirebase.ready) {
-    try {
-      await window.ccoFirebase.ready;
-      await window.ccoFirebase.db.ref('game').set({
-        status: 'official',
-        iniciadoEm: firebase.database.ServerValue.TIMESTAMP
-      });
-    } catch (e) {
-      console.error('[CCO ADM] Não foi possível publicar o início do Game:', e);
-    }
+// Estado oficial e eventos agora trafegam pelo Firebase entre computadores.
+async function publicarEstadoGame(status) {
+  await window.ccoFirebase.ready;
+  const ref = window.ccoFirebase.db.ref('game');
+  if (status === 'official') {
+    const sessionId = 'sess-' + Date.now();
+    currentSessionId = sessionId;
+    await window.ccoFirebase.db.ref('game/events').remove();
+    await ref.set({
+      status: 'official',
+      sessionId,
+      iniciadoEm: firebase.database.ServerValue.TIMESTAMP
+    });
+    return sessionId;
   }
-  channel.postMessage({ type: 'ADMIN_GAME_STARTED' });
-  setPhase('official');
+  await ref.set({
+    status: 'training',
+    sessionId: null,
+    encerradoEm: firebase.database.ServerValue.TIMESTAMP
+  });
+}
+
+function ouvirEstadoGameADM() {
+  const ref = window.ccoFirebase.db.ref('game');
+  ref.on('value', snapshot => {
+    const game = snapshot.val() || {};
+    if (game.status === 'official') {
+      currentSessionId = game.sessionId || currentSessionId;
+      setPhase('official');
+      ouvirEventosOficiais(currentSessionId);
+    } else {
+      if (adminState.phase !== 'training') setPhase('training');
+      if (firebaseEventsListener) { firebaseEventsListener.off(); firebaseEventsListener = null; }
+    }
+  }, error => console.error('[CCO ADM] Erro ao ouvir /game:', error));
+}
+
+function ouvirEventosOficiais(sessionId) {
+  if (!sessionId) return;
+  if (firebaseEventsListener) firebaseEventsListener.off();
+  firebaseEventsListener = window.ccoFirebase.db.ref(`game/events/${sessionId}`);
+  firebaseEventsListener.on('value', snapshot => {
+    const data = snapshot.val() || {};
+    adminState.events = 0;
+    adminState.correct = 0;
+    adminState.wrong = 0;
+    adminState.timeouts = 0;
+    adminState.blocks = 0;
+    adminState.officialActiveEvents = 0;
+    adminState.officialDecisions = 0;
+    adminState.officialFeed = [];
+
+    Object.values(data).sort((a,b) => Number(a.timestamp||0)-Number(b.timestamp||0)).forEach(item => {
+      const type = item.type;
+      const operator = item.operadorNome || item.operador || item.operadorEmail || 'Operador';
+      if (type === 'GAME_EVENT_CREATED' || type === 'CCO_EVENT_CREATED') {
+        adminState.events++;
+        adminState.officialActiveEvents++;
+        adminState.officialFeed.push({ icon:'🔔', title:item.titulo || 'Nova ocorrência', meta:`${operator} • ${item.criticidade || item.origem || 'Game Oficial'}`, points:'' });
+      } else if (type === 'GAME_DECISION_RESULT' || type === 'CCO_DECISION_RESULT') {
+        adminState.officialDecisions++;
+        if (item.correct === true || item.resultado === 'acerto') adminState.correct++; else adminState.wrong++;
+        const pts = Number(item.points || 0);
+        adminState.officialFeed.push({ icon:item.correct === true || item.resultado === 'acerto' ? '✅' : '❌', title:item.titulo || 'Decisão operacional', meta:`${operator}${item.decisao ? ' • ' + item.decisao : ''}`, points: pts ? `${pts > 0 ? '+' : ''}${pts} pts` : '' });
+      } else if (type === 'GAME_TIMEOUT' || type === 'CCO_TIMEOUT') {
+        adminState.timeouts++;
+        adminState.officialFeed.push({ icon:'⏱️', title:'Tempo esgotado', meta:operator, points:Number(item.points || 0) ? `${item.points} pts` : '' });
+      } else if (type === 'OPERATOR_BLOCKED' || type === 'CCO_OPERATOR_BLOCKED') {
+        adminState.blocks++;
+        adminState.officialFeed.push({ icon:'🔒', title:'Operador bloqueado', meta:`${operator} • ${item.motivo || item.reason || 'Penalidade operacional'}`, points:'' });
+      }
+    });
+    render();
+  }, error => console.error('[CCO ADM] Erro ao ouvir eventos oficiais:', error));
+}
+
+$('start').onclick = async () => {
+  try {
+    const sessionId = await publicarEstadoGame('official');
+    currentSessionId = sessionId;
+    adminState.events = 0; adminState.correct = 0; adminState.wrong = 0; adminState.timeouts = 0; adminState.blocks = 0; adminState.officialFeed = [];
+    setPhase('official');
+    console.info('[CCO ADM] GAME OFICIAL iniciado:', sessionId);
+  } catch (e) {
+    console.error('[CCO ADM] Não foi possível iniciar o Game:', e);
+    alert('Não foi possível iniciar o Game Oficial. Verifique o Firebase.');
+  }
 };
 
 $('stop').onclick = async () => {
-  if (window.ccoFirebase && window.ccoFirebase.ready) {
-    try {
-      await window.ccoFirebase.ready;
-      await window.ccoFirebase.db.ref('game').set({
-        status: 'training',
-        encerradoEm: firebase.database.ServerValue.TIMESTAMP
-      });
-    } catch (e) {
-      console.error('[CCO ADM] Não foi possível publicar o encerramento do Game:', e);
-    }
+  try {
+    await publicarEstadoGame('training');
+    setPhase('training');
+    console.info('[CCO ADM] GAME OFICIAL encerrado.');
+  } catch (e) {
+    console.error('[CCO ADM] Não foi possível encerrar o Game:', e);
+    alert('Não foi possível encerrar o Game Oficial. Verifique o Firebase.');
   }
-  channel.postMessage({ type: 'ADMIN_GAME_STOPPED' });
-  setPhase('training');
 };
 
 conectarFirebaseADM();
+window.ccoAdminFirebaseReady = window.ccoFirebase?.ready || null;
+window.addEventListener('load', async () => {
+  try {
+    await window.ccoFirebase.ready;
+    ouvirEstadoGameADM();
+  } catch (e) {
+    console.error('[CCO ADM] Firebase indisponível:', e);
+  }
+});
