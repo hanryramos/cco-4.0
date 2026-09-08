@@ -1377,6 +1377,9 @@
       if (userTag) {
         userTag.innerText = `PLATAFORMA INTEGRADA CCO 4.0 | OPERADOR: ${userEmail}`;
       }
+
+      // Conecta este operador ao Firebase para sincronizar presença e pontos.
+      inicializarSincronizacaoFirebase();
     }
 
     configurarPainelAdmin();
@@ -1688,4 +1691,80 @@
 // Não depende da ocorrência selecionada e não é interrompido ao trocar de aba.
 document.addEventListener('DOMContentLoaded', () => {
   if (typeof iniciarRelogioCCO === 'function') iniciarRelogioCCO();
+});
+
+
+/* ==========================================================================
+   FIREBASE — ETAPA 18: PRESENÇA + PONTUAÇÃO DO OPERADOR
+   Regra desta etapa: durante o treinamento, o Firebase recebe somente
+   identidade operacional, status e pontuação. Detalhes de ocorrências ficam
+   fora desta sincronização até o GAME OFICIAL.
+   ========================================================================== */
+let firebaseSyncInterval = null;
+let firebaseOperatorKey = null;
+
+async function inicializarSincronizacaoFirebase() {
+  if (!window.ccoFirebase || !window.ccoFirebase.ready) return;
+  try {
+    const cred = await window.ccoFirebase.ready;
+    firebaseOperatorKey = cred.user.uid;
+    const ref = window.ccoFirebase.db.ref(`operadores/${firebaseOperatorKey}`);
+
+    // Se o navegador fechar/desconectar, o Firebase marca o operador como offline.
+    await ref.onDisconnect().update({
+      status: 'offline',
+      updatedAt: firebase.database.ServerValue.TIMESTAMP
+    });
+
+    await sincronizarOperadorFirebase();
+
+    if (firebaseSyncInterval) clearInterval(firebaseSyncInterval);
+    firebaseSyncInterval = setInterval(sincronizarOperadorFirebase, 2000);
+    console.info('[CCO 4.0] Firebase conectado. UID:', firebaseOperatorKey);
+  } catch (error) {
+    console.error('[CCO 4.0] Falha ao conectar ao Firebase:', error);
+  }
+}
+
+async function sincronizarOperadorFirebase() {
+  if (!firebaseOperatorKey || !window.ccoFirebase || gameState.isAdmin || !gameState.operador) return;
+
+  const nome = gameState.operador.split('@')[0]
+    .split('.')
+    .map(p => p ? p.charAt(0).toUpperCase() + p.slice(1) : p)
+    .join(' ');
+
+  const dados = {
+    nome,
+    email: gameState.operador,
+    pontos: Number(gameState.pontuacao || 0),
+    status: 'online',
+    fase: 'training',
+    updatedAt: firebase.database.ServerValue.TIMESTAMP
+  };
+
+  try {
+    await window.ccoFirebase.db.ref(`operadores/${firebaseOperatorKey}`).update(dados);
+  } catch (error) {
+    console.error('[CCO 4.0] Erro ao sincronizar operador:', error);
+  }
+}
+
+// Expõe um teste manual no console: testarFirebase() ou testarFirebase(500).
+window.testarFirebase = async function(pontos = 100) {
+  if (!gameState.operador) {
+    console.warn('[CCO 4.0] Faça login como operador antes do teste.');
+    return;
+  }
+  gameState.pontuacao = Number(pontos);
+  await inicializarSincronizacaoFirebase();
+  console.info(`[CCO 4.0] Teste enviado: ${pontos} pontos.`);
+};
+
+// Começa a conexão quando o documento estiver pronto; o login ainda define
+// gameState.operador e a rotina passa a publicar os dados após o login.
+window.addEventListener('load', () => {
+  if (window.ccoFirebase && window.ccoFirebase.ready) {
+    window.ccoFirebase.ready.catch(() => {});
+  }
 });

@@ -12,6 +12,7 @@
  */
 
 const channel = new BroadcastChannel('trem_simulation_channel');
+let firebaseGameListener = null;
 
 const adminState = {
   phase: 'training',
@@ -319,14 +320,112 @@ function handleEvent(data) {
 
 channel.onmessage = event => handleEvent(event.data || {});
 
-$('start').onclick = () => {
+setPhase('training');
+
+
+/* ==========================================================================
+   FIREBASE — ETAPA 18
+   No treinamento, o ADM recebe apenas operador + pontuação.
+   ========================================================================== */
+async function conectarFirebaseADM() {
+  if (!window.ccoFirebase || !window.ccoFirebase.ready) return;
+  try {
+    await window.ccoFirebase.ready;
+
+    firebaseGameListener = window.ccoFirebase.db.ref('operadores');
+    firebaseGameListener.on('value', snapshot => {
+      const data = snapshot.val() || {};
+      const next = new Map();
+
+      Object.entries(data).forEach(([key, item]) => {
+        if (!item || !item.email) return;
+        next.set(key, {
+          key,
+          name: item.nome || item.email.split('@')[0],
+          email: item.email,
+          correct: 0,
+          wrong: 0,
+          points: Number(item.pontos || 0),
+          status: item.status || 'offline',
+          updatedAt: item.updatedAt || 0
+        });
+      });
+
+      adminState.operators = next;
+      adminState.points = [...next.values()].reduce((sum, op) => sum + Number(op.points || 0), 0);
+      render();
+    });
+
+    console.info('[CCO ADM] Firebase conectado.');
+  } catch (error) {
+    console.error('[CCO ADM] Falha ao conectar ao Firebase:', error);
+  }
+}
+
+const originalRenderRanking = renderRanking;
+renderRanking = function() {
+  const body = $('ranking');
+  if (!body) return;
+
+  const rows = [...adminState.operators.values()]
+    .sort((a, b) => b.points - a.points)
+    .map((op, i) => {
+      const total = op.correct + op.wrong;
+      const accuracy = total ? Math.round(op.correct / total * 100) : 0;
+      const status = op.status === 'online' ? '🟢 ONLINE' : '⚪ OFFLINE';
+      return `<tr data-key="${esc(op.key)}">
+        <td>${i + 1}º</td>
+        <td><strong>${esc(op.name)}</strong><br><small>${status}</small></td>
+        <td>${esc(op.email)}</td>
+        <td>${op.correct}</td>
+        <td>${op.wrong}</td>
+        <td>${accuracy}%</td>
+        <td><strong>${op.points}</strong></td>
+      </tr>`;
+    }).join('');
+
+  body.innerHTML = rows ||
+    '<tr><td colspan="7" class="empty">Nenhum operador registrado.</td></tr>';
+
+  [...body.querySelectorAll('tr[data-key]')].forEach(row => {
+    row.onclick = () => showOperator(row.dataset.key);
+  });
+};
+
+// O estado oficial também passa a ser publicado no Firebase. Nesta etapa isso
+// serve como base; na próxima, os operadores ouvirão este estado para iniciar
+// o Game Oficial em computadores diferentes.
+const originalStartHandler = $('start').onclick;
+$('start').onclick = async () => {
+  if (window.ccoFirebase && window.ccoFirebase.ready) {
+    try {
+      await window.ccoFirebase.ready;
+      await window.ccoFirebase.db.ref('game').set({
+        status: 'official',
+        iniciadoEm: firebase.database.ServerValue.TIMESTAMP
+      });
+    } catch (e) {
+      console.error('[CCO ADM] Não foi possível publicar o início do Game:', e);
+    }
+  }
   channel.postMessage({ type: 'ADMIN_GAME_STARTED' });
   setPhase('official');
 };
 
-$('stop').onclick = () => {
+$('stop').onclick = async () => {
+  if (window.ccoFirebase && window.ccoFirebase.ready) {
+    try {
+      await window.ccoFirebase.ready;
+      await window.ccoFirebase.db.ref('game').set({
+        status: 'training',
+        encerradoEm: firebase.database.ServerValue.TIMESTAMP
+      });
+    } catch (e) {
+      console.error('[CCO ADM] Não foi possível publicar o encerramento do Game:', e);
+    }
+  }
   channel.postMessage({ type: 'ADMIN_GAME_STOPPED' });
   setPhase('training');
 };
 
-setPhase('training');
+conectarFirebaseADM();
