@@ -38,39 +38,56 @@
   ];
 
   const bancoIncidentes = [
-    {
-      id: 1,
-      titulo: '🔥 Elevação Térmica em Eixo',
-      criticidade: 'critico',
-      descricao: 'Sensor detectou 92°C no vagão VL-862 (Trecho KM 108).',
-      opcoes: [
-        { texto: 'Aplicar Manutenção Preditiva no Pátio', correta: true, pontos: 150 },
-        { texto: 'Ignorar e manter velocidade nominal', correta: false, penalidade: -100 }
-      ],
-      risco: 'Risco iminente de descarrilamento se mantido em via.'
-    },
-    {
-      id: 2,
-      titulo: '⚠️ Gargalo de Pátio RAMP',
-      criticidade: 'grave',
-      descricao: 'Acúmulo de composições acima do limite nominal no pátio.',
-      opcoes: [
-        { texto: 'Redirecionar fluxo para Via Secundária 2', correta: true, pontos: 100 },
-        { texto: 'Forçar entrada da composição principal', correta: false, penalidade: -80 }
-      ],
-      risco: 'Risco de travamento total da malha em 15 minutos.'
-    },
-    {
-      id: 3,
-      titulo: '📉 Condução Desecológica',
-      criticidade: 'moderado',
-      descricao: 'Operador atuando em Notch 8 em trecho de rampa plana.',
-      opcoes: [
-        { texto: 'Ativar Assistente Eco-Driving Preditivo', correta: true, pontos: 70 },
-        { texto: 'Manter controle 100% manual', correta: false, penalidade: -50 }
-      ],
-      risco: 'Consumo de combustível 18% acima da meta.'
-    }
+    { id: 1, titulo: '🚂 Gargalo de Pátio RAMP', criticidade: 'grave', descricao: 'Ocupação do pátio ultrapassou a faixa nominal e há risco de retenção das próximas composições.', opcoes: [{ texto: 'Redirecionar parte do fluxo para a Via Secundária 2 e acompanhar a capacidade.', correta: true, pontos: 100 }, { texto: 'Forçar a entrada da próxima composição para tentar liberar o pátio.', correta: false, penalidade: -80 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 2, titulo: '🚂 Ocupação Elevada de Trecho', criticidade: 'moderado', descricao: 'A ocupação do trecho está acima da faixa planejada para o próximo ciclo.', opcoes: [{ texto: 'Controlar novas entradas e reorganizar a sequência das composições.', correta: true, pontos: 70 }, { texto: 'Manter todas as entradas para evitar qualquer atraso.', correta: false, penalidade: -50 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 3, titulo: '🚂 Conflito de Rota', criticidade: 'grave', descricao: 'Dois movimentos planejados apresentam conflito de rota em uma mesma janela operacional.', opcoes: [{ texto: 'Reordenar os movimentos e liberar a rota com menor risco operacional.', correta: true, pontos: 100 }, { texto: 'Liberar os dois movimentos simultaneamente.', correta: false, penalidade: -80 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 4, titulo: '🚂 Inconsistência de Sinalização', criticidade: 'grave', descricao: 'A indicação de sinalização diverge do planejamento operacional recebido.', opcoes: [{ texto: 'Interromper o avanço e validar a condição da rota antes de prosseguir.', correta: true, pontos: 100 }, { texto: 'Prosseguir com base apenas no planejamento original.', correta: false, penalidade: -80 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 5, titulo: '🚂 Trem Aguardando Liberação', criticidade: 'moderado', descricao: 'Uma composição permanece parada aguardando autorização para avançar.', opcoes: [{ texto: 'Verificar a condição da rota e liberar somente após confirmação operacional.', correta: true, pontos: 70 }, { texto: 'Liberar imediatamente sem validar a rota.', correta: false, penalidade: -50 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 6, titulo: '🚂 Pátio Próximo da Capacidade', criticidade: 'grave', descricao: 'A ocupação do pátio está próxima do limite e novas composições se aproximam.', opcoes: [{ texto: 'Reduzir novas entradas e priorizar a reorganização do pátio.', correta: true, pontos: 100 }, { texto: 'Manter o fluxo máximo de entrada.', correta: false, penalidade: -80 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 7, titulo: '🚂 Janela Operacional Reduzida', criticidade: 'moderado', descricao: 'A janela disponível para um movimento foi reduzida por restrição operacional.', opcoes: [{ texto: 'Replanejar a sequência respeitando a nova janela disponível.', correta: true, pontos: 70 }, { texto: 'Ignorar a redução e manter o planejamento original.', correta: false, penalidade: -50 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 8, titulo: '🚂 Aproximação Simultânea de Trens', criticidade: 'grave', descricao: 'Duas composições se aproximam de uma região com capacidade limitada.', opcoes: [{ texto: 'Coordenar a sequência e manter uma composição em condição segura de espera.', correta: true, pontos: 100 }, { texto: 'Permitir que as duas avancem para ganhar tempo.', correta: false, penalidade: -80 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 9, titulo: '🚂 Atraso na Formação', criticidade: 'moderado', descricao: 'A formação de uma composição apresenta atraso em relação ao planejamento.', opcoes: [{ texto: 'Reorganizar a sequência e avaliar alternativas sem comprometer a segurança.', correta: true, pontos: 70 }, { texto: 'Acelerar todas as etapas sem análise operacional.', correta: false, penalidade: -50 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 10, titulo: '🚂 Bloqueio Parcial de Trecho', criticidade: 'grave', descricao: 'Parte da malha fica temporariamente indisponível para circulação.', opcoes: [{ texto: 'Redirecionar o fluxo e atualizar a sequência operacional.', correta: true, pontos: 100 }, { texto: 'Manter os movimentos previstos como se o trecho estivesse livre.', correta: false, penalidade: -80 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 11, titulo: '🚂 Prioridades Operacionais Conflitantes', criticidade: 'grave', descricao: 'Dois movimentos possuem prioridade operacional semelhante na mesma janela.', opcoes: [{ texto: 'Avaliar impacto global e definir a sequência com menor risco.', correta: true, pontos: 100 }, { texto: 'Escolher o movimento mais próximo sem analisar o restante da malha.', correta: false, penalidade: -80 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 12, titulo: '🚂 Ocupação Crítica de Pátio', criticidade: 'critico', descricao: 'A capacidade disponível do pátio está próxima do limite máximo.', opcoes: [{ texto: 'Restringir entradas e executar um plano imediato de descompressão do pátio.', correta: true, pontos: 150 }, { texto: 'Continuar a entrada normal até que a capacidade seja atingida.', correta: false, penalidade: -100 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 13, titulo: '🤖 HotBox em Elevação', criticidade: 'grave', descricao: 'A temperatura de um rolamento apresenta tendência de aumento contínuo.', opcoes: [{ texto: 'Reduzir o risco operacional e encaminhar a composição para avaliação preditiva.', correta: true, pontos: 100 }, { texto: 'Ignorar a tendência enquanto não houver alarme máximo.', correta: false, penalidade: -80 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 14, titulo: '🤖 HotBox Acima do Padrão', criticidade: 'critico', descricao: 'O monitoramento indica temperatura significativamente acima do comportamento esperado.', opcoes: [{ texto: 'Interromper a progressão operacional e direcionar a composição para inspeção.', correta: true, pontos: 150 }, { texto: 'Manter a velocidade nominal e aguardar nova leitura.', correta: false, penalidade: -100 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 15, titulo: '🤖 Impacto WILD Acima do Padrão', criticidade: 'grave', descricao: 'O sistema identifica impacto de roda acima do limite operacional esperado.', opcoes: [{ texto: 'Reduzir a exposição ao risco e solicitar avaliação da composição.', correta: true, pontos: 100 }, { texto: 'Manter o movimento normal sem intervenção.', correta: false, penalidade: -80 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 16, titulo: '🤖 Queda de Confiabilidade do Sensor', criticidade: 'moderado', descricao: 'A confiabilidade de um sensor caiu e os dados apresentam maior incerteza.', opcoes: [{ texto: 'Validar a informação com outras fontes antes de tomar uma decisão crítica.', correta: true, pontos: 70 }, { texto: 'Tratar a leitura como totalmente confiável.', correta: false, penalidade: -50 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 17, titulo: '🤖 HotBox + WILD Simultâneo', criticidade: 'critico', descricao: 'O mesmo trem apresenta sinais anormais de temperatura e impacto de roda.', opcoes: [{ texto: 'Classificar como prioridade crítica e direcionar para avaliação imediata.', correta: true, pontos: 150 }, { texto: 'Continuar a viagem e observar os indicadores.', correta: false, penalidade: -100 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 18, titulo: '🤖 Tendência Anormal de Temperatura', criticidade: 'moderado', descricao: 'O modelo preditivo identifica crescimento contínuo de temperatura em um componente.', opcoes: [{ texto: 'Aumentar o monitoramento e programar intervenção antes da condição crítica.', correta: true, pontos: 70 }, { texto: 'Aguardar o indicador atingir o limite máximo.', correta: false, penalidade: -50 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 19, titulo: '🤖 Anomalia Recorrente Detectada', criticidade: 'grave', descricao: 'A IA identifica comportamento anormal repetido em um equipamento.', opcoes: [{ texto: 'Investigar a recorrência e programar intervenção preventiva.', correta: true, pontos: 100 }, { texto: 'Desconsiderar por já ter ocorrido anteriormente.', correta: false, penalidade: -80 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 20, titulo: '🤖 Previsão de Falha Mecânica', criticidade: 'critico', descricao: 'O modelo indica alta probabilidade de falha caso o movimento continue.', opcoes: [{ texto: 'Interromper ou restringir o movimento e solicitar avaliação técnica.', correta: true, pontos: 150 }, { texto: 'Prosseguir para evitar impacto no cronograma.', correta: false, penalidade: -100 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 21, titulo: '🤖 Sensor com Leitura Inconsistente', criticidade: 'moderado', descricao: 'Os dados recebidos apresentam variações incompatíveis com o histórico recente.', opcoes: [{ texto: 'Comparar com sensores correlatos e validar a informação.', correta: true, pontos: 70 }, { texto: 'Usar o último valor recebido como verdade absoluta.', correta: false, penalidade: -50 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 22, titulo: '🤖 Degradação de Componente', criticidade: 'grave', descricao: 'O modelo identifica tendência de deterioração em um componente ferroviário.', opcoes: [{ texto: 'Registrar a tendência e antecipar a manutenção recomendada.', correta: true, pontos: 100 }, { texto: 'Aguardar uma falha para confirmar o diagnóstico.', correta: false, penalidade: -80 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 23, titulo: '🤖 Alerta Preditivo de Roda', criticidade: 'grave', descricao: 'O sistema detecta comportamento fora do padrão em um conjunto de rodas.', opcoes: [{ texto: 'Reduzir o risco e encaminhar para avaliação do conjunto.', correta: true, pontos: 100 }, { texto: 'Manter o movimento sem análise adicional.', correta: false, penalidade: -80 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 24, titulo: '🤖 Anomalia Múltipla no Trem', criticidade: 'critico', descricao: 'Diferentes indicadores apontam simultaneamente para risco operacional.', opcoes: [{ texto: 'Tratar o evento como prioridade e realizar avaliação integrada.', correta: true, pontos: 150 }, { texto: 'Analisar cada indicador isoladamente e manter o movimento.', correta: false, penalidade: -100 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 25, titulo: '🌱 Consumo Acima da Meta', criticidade: 'moderado', descricao: 'O consumo energético acumulado está acima da meta planejada para o trecho.', opcoes: [{ texto: 'Ajustar o perfil de condução e buscar recuperação de eficiência.', correta: true, pontos: 70 }, { texto: 'Manter a condução atual até o fim do trecho.', correta: false, penalidade: -50 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 26, titulo: '🌱 Aceleração Acima do Recomendado', criticidade: 'moderado', descricao: 'O perfil de condução apresenta aceleração desnecessariamente elevada.', opcoes: [{ texto: 'Reduzir a demanda de tração e adotar condução mais eficiente.', correta: true, pontos: 70 }, { texto: 'Manter a aceleração máxima disponível.', correta: false, penalidade: -50 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 27, titulo: '🌱 Velocidade Fora do Perfil Econômico', criticidade: 'moderado', descricao: 'A composição opera acima da faixa considerada ideal para eficiência energética.', opcoes: [{ texto: 'Adequar a velocidade ao perfil econômico e às condições da via.', correta: true, pontos: 70 }, { texto: 'Aumentar ainda mais a velocidade para ganhar tempo.', correta: false, penalidade: -50 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 28, titulo: '🌱 Frenagem Antecipada Necessária', criticidade: 'moderado', descricao: 'O perfil da via indica necessidade de antecipar a redução de velocidade.', opcoes: [{ texto: 'Antecipar a frenagem de forma gradual e controlada.', correta: true, pontos: 70 }, { texto: 'Esperar a aproximação do ponto crítico para frear.', correta: false, penalidade: -50 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 29, titulo: '🌱 Recuperação de Atraso', criticidade: 'grave', descricao: 'A composição está atrasada e existe pressão para recuperar tempo.', opcoes: [{ texto: 'Recuperar o atraso respeitando o perfil seguro e eficiente de condução.', correta: true, pontos: 100 }, { texto: 'Acelerar ao máximo durante todo o trecho.', correta: false, penalidade: -80 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 30, titulo: '🌱 Curva + Aceleração', criticidade: 'grave', descricao: 'A composição se aproxima de uma curva enquanto mantém aceleração elevada.', opcoes: [{ texto: 'Reduzir a tração e adequar a velocidade antes da curva.', correta: true, pontos: 100 }, { texto: 'Manter a aceleração até entrar na curva.', correta: false, penalidade: -80 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 31, titulo: '🌱 Marcha Ineficiente', criticidade: 'moderado', descricao: 'A condição operacional permite reduzir o esforço de tração sem comprometer a marcha.', opcoes: [{ texto: 'Ajustar a condução para reduzir consumo mantendo o desempenho necessário.', correta: true, pontos: 70 }, { texto: 'Manter o esforço máximo de tração.', correta: false, penalidade: -50 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 32, titulo: '🌱 Consumo Crítico', criticidade: 'grave', descricao: 'O consumo acumulado está muito acima da meta e compromete a eficiência do ciclo.', opcoes: [{ texto: 'Revisar imediatamente o perfil de condução e reduzir desperdícios.', correta: true, pontos: 100 }, { texto: 'Ignorar o indicador para preservar a velocidade.', correta: false, penalidade: -80 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 33, titulo: '🌱 Parada Não Planejada', criticidade: 'moderado', descricao: 'A composição precisa realizar uma parada fora do planejamento original.', opcoes: [{ texto: 'Recalcular o perfil de condução e reduzir o impacto energético da parada.', correta: true, pontos: 70 }, { texto: 'Manter o mesmo perfil como se a parada não existisse.', correta: false, penalidade: -50 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 34, titulo: '🌱 Restrição Operacional à Frente', criticidade: 'grave', descricao: 'Uma restrição exige adequação do perfil de velocidade nos próximos quilômetros.', opcoes: [{ texto: 'Antecipar a redução de velocidade e ajustar a condução.', correta: true, pontos: 100 }, { texto: 'Esperar chegar à restrição para reagir.', correta: false, penalidade: -80 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 35, titulo: '🌱 Forte Demanda de Tração', criticidade: 'grave', descricao: 'O perfil atual exige elevado esforço de tração por período prolongado.', opcoes: [{ texto: 'Reavaliar o perfil de condução e usar a tração de forma eficiente.', correta: true, pontos: 100 }, { texto: 'Manter potência máxima continuamente.', correta: false, penalidade: -80 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 36, titulo: '🌱 Atraso + Restrição de Velocidade', criticidade: 'critico', descricao: 'O trem atrasado se aproxima de uma região com restrição operacional.', opcoes: [{ texto: 'Priorizar segurança e eficiência, ajustando o perfil sem ultrapassar a restrição.', correta: true, pontos: 150 }, { texto: 'Acelerar antes da restrição para compensar todo o atraso.', correta: false, penalidade: -100 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 37, titulo: '🛤️ Vibração Elevada no Truque', criticidade: 'grave', descricao: 'O sensor identifica vibração acima do comportamento normal no truque.', opcoes: [{ texto: 'Reduzir o risco e encaminhar a composição para avaliação.', correta: true, pontos: 100 }, { texto: 'Manter a velocidade e aguardar nova ocorrência.', correta: false, penalidade: -80 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 38, titulo: '🛤️ Temperatura Elevada em Componente', criticidade: 'grave', descricao: 'A temperatura de um componente apresenta elevação anormal durante o movimento.', opcoes: [{ texto: 'Reduzir a exposição ao risco e solicitar inspeção.', correta: true, pontos: 100 }, { texto: 'Ignorar enquanto não atingir o limite máximo.', correta: false, penalidade: -80 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 39, titulo: '🛤️ Comportamento Anormal de Roda', criticidade: 'grave', descricao: 'O sistema identifica comportamento fora do padrão esperado em uma roda.', opcoes: [{ texto: 'Solicitar avaliação do conjunto e adequar o movimento.', correta: true, pontos: 100 }, { texto: 'Continuar normalmente sem intervenção.', correta: false, penalidade: -80 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 40, titulo: '🛤️ Emergência Mecânica', criticidade: 'critico', descricao: 'Indícios apontam para possível falha mecânica durante o movimento.', opcoes: [{ texto: 'Executar protocolo de emergência e priorizar a integridade da composição.', correta: true, pontos: 150 }, { texto: 'Manter o movimento para evitar atraso.', correta: false, penalidade: -100 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 41, titulo: '🛤️ Vibração Crescente', criticidade: 'moderado', descricao: 'A vibração apresenta tendência de aumento contínuo.', opcoes: [{ texto: 'Aumentar o monitoramento e avaliar intervenção antes do agravamento.', correta: true, pontos: 70 }, { texto: 'Aguardar o valor atingir o limite crítico.', correta: false, penalidade: -50 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 42, titulo: '🛤️ Assimetria entre Rodas', criticidade: 'grave', descricao: 'Sensores indicam comportamento diferente entre conjuntos de rodas.', opcoes: [{ texto: 'Reduzir o risco e solicitar inspeção direcionada.', correta: true, pontos: 100 }, { texto: 'Desconsiderar a assimetria como variação normal.', correta: false, penalidade: -80 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 43, titulo: '🛤️ Desgaste Fora do Padrão', criticidade: 'moderado', descricao: 'Indicadores apontam desgaste superior ao esperado em componente ferroviário.', opcoes: [{ texto: 'Registrar a anomalia e antecipar avaliação de manutenção.', correta: true, pontos: 70 }, { texto: 'Continuar até o próximo ciclo sem registrar o alerta.', correta: false, penalidade: -50 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 44, titulo: '🛤️ Temperatura + Vibração', criticidade: 'critico', descricao: 'Dois indicadores mecânicos apresentam alterações simultaneamente.', opcoes: [{ texto: 'Tratar como ocorrência crítica e direcionar para avaliação imediata.', correta: true, pontos: 150 }, { texto: 'Avaliar somente o indicador menos grave.', correta: false, penalidade: -100 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 45, titulo: '🛤️ Impacto Elevado em Roda', criticidade: 'grave', descricao: 'O impacto registrado apresenta valor acima do padrão operacional.', opcoes: [{ texto: 'Adequar o movimento e solicitar avaliação da roda.', correta: true, pontos: 100 }, { texto: 'Manter o movimento sem intervenção.', correta: false, penalidade: -80 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 46, titulo: '🛤️ Anomalia no Truque', criticidade: 'grave', descricao: 'O sistema identifica comportamento anormal no conjunto do truque.', opcoes: [{ texto: 'Reduzir o risco e solicitar inspeção técnica.', correta: true, pontos: 100 }, { texto: 'Ignorar o alerta enquanto não houver falha.', correta: false, penalidade: -80 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 47, titulo: '🛤️ Oscilação Anormal do Vagão', criticidade: 'grave', descricao: 'O monitoramento identifica oscilação acima do comportamento esperado.', opcoes: [{ texto: 'Reduzir a exposição ao risco e avaliar a composição.', correta: true, pontos: 100 }, { texto: 'Aumentar a velocidade para estabilizar o movimento.', correta: false, penalidade: -80 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 48, titulo: '🛤️ Falha de Monitoramento', criticidade: 'moderado', descricao: 'O sistema perde temporariamente dados de um equipamento monitorado.', opcoes: [{ texto: 'Reduzir a dependência do dado perdido e validar a condição por outras fontes.', correta: true, pontos: 70 }, { texto: 'Assumir que o equipamento está normal.', correta: false, penalidade: -50 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 49, titulo: '🛤️ Múltiplos Alertas Mecânicos', criticidade: 'critico', descricao: 'Mais de um componente apresenta sinais simultâneos de anormalidade.', opcoes: [{ texto: 'Priorizar a integridade do trem e iniciar avaliação integrada.', correta: true, pontos: 150 }, { texto: 'Tratar cada alerta isoladamente e manter o movimento.', correta: false, penalidade: -100 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
+    { id: 50, titulo: '🛤️ Risco Elevado de Integridade do Trem', criticidade: 'critico', descricao: 'O conjunto de indicadores aponta necessidade de intervenção imediata.', opcoes: [{ texto: 'Executar a resposta operacional de maior segurança e solicitar avaliação.', correta: true, pontos: 150 }, { texto: 'Prosseguir normalmente para evitar impacto no cronograma.', correta: false, penalidade: -100 }], risco: 'Risco operacional associado à ocorrência. Requer acompanhamento e decisão do operador.' },
   ];
 
 
@@ -1437,24 +1454,40 @@
     if (!gameState.isAdmin) return;
     gameState.emExecucao = false;
     if (gameState.intervaloCards) clearInterval(gameState.intervaloCards);
+    if (timeoutProximoCard) clearTimeout(timeoutProximoCard);
+    timeoutProximoCard = null;
     gameState.cardsAtivos = [];
     const container = document.getElementById('game-cards-container');
     if (container) container.innerHTML = '';
     alert('Simulação PARADA pelo Administrador.');
   }
 
-  function iniciarGeradorDeIncidentes() {
-    if (!gameState.emExecucao) return;
-    gerarNovoCardIncidente();
-    gameState.intervaloCards = setInterval(() => {
-      if (gameState.emExecucao && !isCurrentTabBlocked() && gameState.cardsAtivos.length < 3) {
+  let ultimoIncidenteId = null;
+  let timeoutProximoCard = null;
+
+  function agendarProximoCard(delay = 5000) {
+    if (timeoutProximoCard) clearTimeout(timeoutProximoCard);
+    timeoutProximoCard = setTimeout(() => {
+      timeoutProximoCard = null;
+      if (gameState.emExecucao && firebaseGamePhase === 'official' && !isCurrentTabBlocked() && gameState.cardsAtivos.length === 0) {
         gerarNovoCardIncidente();
       }
-    }, 15000);
+    }, delay);
+  }
+
+  function iniciarGeradorDeIncidentes() {
+    if (!gameState.emExecucao || firebaseGamePhase !== 'official') return;
+    if (gameState.cardsAtivos.length === 0 && !timeoutProximoCard) {
+      agendarProximoCard(5000);
+    }
   }
 
   function gerarNovoCardIncidente() {
-    const incidenteBase = bancoIncidentes[Math.floor(Math.random() * bancoIncidentes.length)];
+    if (!gameState.emExecucao || firebaseGamePhase !== 'official' || gameState.cardsAtivos.length > 0) return;
+    let disponiveis = bancoIncidentes.filter(item => item.id !== ultimoIncidenteId);
+    if (!disponiveis.length) disponiveis = bancoIncidentes;
+    const incidenteBase = disponiveis[Math.floor(Math.random() * disponiveis.length)];
+    ultimoIncidenteId = incidenteBase.id;
     const cardId = 'card-' + Date.now();
     const cardData = {
       id: cardId,
@@ -1574,12 +1607,13 @@
       aplicarBloqueioOperador('Decisão Inadequada tomou rumo crítico na malha!');
     }
     gameState.cardsAtivos.splice(cardIndex, 1);
+    agendarProximoCard(5000);
   }
 
   function aguardarCard(cardId) {
     removerCardTela(cardId);
     const cardIndex = gameState.cardsAtivos.findIndex(c => c.id === cardId);
-    if (cardIndex !== -1) gameState.cardsAtivos.splice(cardIndex, 1);
+    if (cardIndex !== -1) { gameState.cardsAtivos.splice(cardIndex, 1); agendarProximoCard(5000); }
   }
 
   function finalizarCardPorTimeout(cardId) {
@@ -1593,6 +1627,7 @@
         titulo: card.titulo, eventoId: card.id, points: -50
       });
       aplicarBloqueioOperador('Tempo Esgotado! Falha na tomada de decisão do CCO.');
+      agendarProximoCard(60000);
     }
   }
 
@@ -1791,7 +1826,7 @@ function iniciarGameOficialLocal(sessionId) {
 
   // Cards do Game Oficial são gerados no computador de cada operador.
   // O ADM acompanha as ocorrências e decisões via Firebase.
-  if (!gameState.intervaloCards) iniciarGeradorDeIncidentes();
+  iniciarGeradorDeIncidentes();
   console.info('[CCO 4.0] GAME OFICIAL iniciado. Sessão:', firebaseGameSessionId);
 }
 
