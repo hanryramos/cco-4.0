@@ -2345,3 +2345,176 @@ html,body { max-width:100%; overflow-x:hidden; }
   #game-cards-container > .game-card .game-card-actions { grid-template-columns: 1fr; }
   #game-cards-container > .game-card .game-card-body { font-size: 13px; line-height: 1.5; }
 }
+
+/* =========================================================
+   CORREÇÃO MOBILE — CARDS DE SIMULAÇÃO
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    /* Permite que a tela do celular tenha rolagem natural */
+    html,
+    body {
+        width: 100%;
+        min-width: 0;
+        height: auto;
+        min-height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    /* A aplicação deixa de ficar presa em 100vh */
+    .cco-container {
+        width: 100%;
+        min-height: 100dvh;
+        height: auto;
+    }
+
+    /* Área principal pode crescer conforme o conteúdo */
+    .content-area {
+        height: auto;
+        min-height: calc(100dvh - 110px);
+        overflow: visible;
+    }
+
+    /* Módulo ativo pode crescer verticalmente */
+    .module.active {
+        height: auto;
+        min-height: 100%;
+        overflow-y: visible;
+    }
+
+    /* =====================================================
+       CARD DA OCORRÊNCIA
+       ===================================================== */
+
+    #game-cards-container {
+        position: fixed !important;
+        inset: 0 !important;
+        width: 100vw !important;
+        height: 100dvh !important;
+        max-width: none !important;
+        pointer-events: none !important;
+        z-index: 2147482000 !important;
+
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    #game-cards-container > .game-card {
+        position: fixed !important;
+
+        top: 10px !important;
+        right: 10px !important;
+        bottom: 10px !important;
+        left: 10px !important;
+
+        width: auto !important;
+        max-width: none !important;
+
+        height: auto !important;
+        max-height: calc(100dvh - 20px) !important;
+
+        margin: 0 !important;
+        padding: 14px !important;
+
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+
+        box-sizing: border-box !important;
+
+        pointer-events: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+
+        display: block !important;
+    }
+
+    /* =====================================================
+       CONTEÚDO DA OCORRÊNCIA
+       ===================================================== */
+
+    #game-cards-container > .game-card .game-card-header {
+        margin-bottom: 10px;
+    }
+
+    #game-cards-container > .game-card .game-card-body {
+        line-height: 1.5;
+        margin-bottom: 12px;
+    }
+
+    /* Opções uma abaixo da outra */
+    #game-cards-container > .game-card .game-card-options {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+
+    #game-cards-container > .game-card .btn-option {
+        width: 100% !important;
+        min-height: 52px !important;
+        padding: 12px !important;
+        font-size: 13px !important;
+        line-height: 1.4 !important;
+        white-space: normal !important;
+    }
+
+    /* =====================================================
+       BOTÕES DE AÇÃO
+       ===================================================== */
+
+    #game-cards-container > .game-card .game-card-actions {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 10px !important;
+
+        margin-top: 12px !important;
+        padding-top: 12px !important;
+    }
+
+    #game-cards-container > .game-card .btn-action-exec,
+    #game-cards-container > .game-card .btn-action-wait {
+        width: 100% !important;
+        min-height: 50px !important;
+        padding: 12px !important;
+        font-size: 13px !important;
+    }
+
+    /* Informações adicionais ocupam a largura inteira */
+    #game-cards-container > .game-card .wait-probability,
+    #game-cards-container > .game-card .risk-info {
+        grid-column: 1 / -1 !important;
+    }
+}
+
+
+/* =========================================================
+   CELULARES MUITO PEQUENOS
+   ========================================================= */
+
+@media (max-width: 420px) {
+
+    #game-cards-container > .game-card {
+        top: 6px !important;
+        right: 6px !important;
+        bottom: 6px !important;
+        left: 6px !important;
+
+        max-height: calc(100dvh - 12px) !important;
+        padding: 12px !important;
+    }
+
+    #game-cards-container > .game-card .btn-option {
+        min-height: 50px !important;
+        font-size: 12px !important;
+    }
+
+    #game-cards-container > .game-card .game-card-actions {
+        grid-template-columns: 1fr !important;
+    }
+
+    #game-cards-container > .game-card .btn-action-exec,
+    #game-cards-container > .game-card .btn-action-wait {
+        min-height: 48px !important;
+    }
+}
