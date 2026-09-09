@@ -2270,3 +2270,69 @@ html,body { max-width:100%; overflow-x:hidden; }
   #challenge-list-view, .challenge-subview { padding: 16px; }
   .challenge-match-head { grid-template-columns: 1fr 35px 1fr; gap: 7px; }
 }
+
+/* ==========================================================================
+   AJUSTES FINAIS — CARD DE DECISÃO NO CELULAR
+   ========================================================================== */
+
+/* 1) Remove o "contorno fantasma" azul no card do game.
+   Ao abrir o <dialog>, o navegador foca o 1º botão de opção e o
+   :focus-visible global o contorna de azul sem o operador selecionar nada;
+   no toque, o hover também fica "grudado" e deixa opção azul por engano.
+   Só afeta dispositivos de toque — no computador o foco do teclado continua. */
+@media (hover: none), (pointer: coarse) {
+  #game-cards-container > .game-card .btn-option:focus-visible,
+  #game-cards-container > .game-card .btn-action-exec:focus-visible,
+  #game-cards-container > .game-card .btn-action-wait:focus-visible {
+    outline: none !important;
+  }
+  #game-cards-container > .game-card .btn-option:hover,
+  #game-cards-container > .game-card .btn-action-exec:hover,
+  #game-cards-container > .game-card .btn-action-wait:hover {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+  }
+  .challenge-option:focus-visible:not(.selected) { outline: none; }
+}
+
+/* 2) Card de decisão centralizado e com área útil completa no celular. */
+@media (max-width: 700px) {
+  #game-cards-container > .game-card {
+    inset: 10px !important;
+    margin: auto !important;
+    width: calc(100vw - 20px) !important;
+    max-width: none !important;
+    max-height: calc(100vh - 20px) !important;
+    max-height: calc(100dvh - 20px) !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    border-radius: 14px !important;
+    padding: 14px !important;
+  }
+  #game-cards-container > .game-card .game-card-options { gap: 10px; }
+  #game-cards-container > .game-card .btn-option {
+    padding: 12px 11px;
+    font-size: 13px;
+    line-height: 1.35;
+    text-align: left;
+  }
+  #game-cards-container > .game-card .btn-action-exec,
+  #game-cards-container > .game-card .btn-action-wait {
+    padding: 12px;
+    font-size: 13px;
+    border-radius: 8px !important;
+  }
+  #game-cards-container > .game-card .game-card-actions {
+    grid-template-columns: 1fr 1fr;
+  }
+  #game-cards-container > .game-card .wait-probability,
+  #game-cards-container > .game-card .risk-info {
+    grid-column: 1 / -1;
+  }
+  #game-cards-container > .game-card .game-card-title { font-size: 14px; }
+}
+
+@media (max-width: 420px) {
+  #game-cards-container > .game-card .game-card-actions { grid-template-columns: 1fr; }
+  #game-cards-container > .game-card .game-card-body { font-size: 13px; line-height: 1.5; }
+}

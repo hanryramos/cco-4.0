@@ -1216,7 +1216,7 @@
         aplicarBloqueioOperador('Tempo esgotado para assumir a ocorrência.', alvoAssumir);
         atualizarBanner(jaBloqueadoAssumir
           ? 'Tempo esgotado para assumir a ocorrência. -50 pontos (operador já bloqueado — sem novo bloqueio).'
-          : 'Tempo esgotado para assumir a ocorrência. -50 pontos e bloqueio de 60 segundos.', '#ef4444');
+          : 'Tempo esgotado para assumir a ocorrência. -50 pontos e bloqueio de 35 segundos.', '#ef4444');
         selectedCcoEventId = evento.id;
         houveMudancaDeStatus = true;
       }
@@ -1359,9 +1359,9 @@
       const resultado = evento.resultado === 'acerto'
         ? '<div class="cco-training-result success">✓ Decisão correta. Pontos adicionados ao desempenho do operador.</div>'
         : evento.resultado === 'erro'
-          ? '<div class="cco-training-result error">✕ Decisão inadequada. O operador foi bloqueado por 60 segundos.</div>'
+          ? '<div class="cco-training-result error">✕ Decisão inadequada. O operador foi bloqueado por 35 segundos.</div>'
           : evento.resultado === 'timeout-assumir'
-            ? '<div class="cco-training-result error">⏱ Prazo para assumir esgotado. -50 pontos e bloqueio de 60 segundos.</div>'
+            ? '<div class="cco-training-result error">⏱ Prazo para assumir esgotado. -50 pontos e bloqueio de 35 segundos.</div>'
             : '<div class="cco-training-result error">⏱ Prazo para decisão esgotado. -75 pontos.</div>';
       actionHtml = resultado;
     }
@@ -1432,7 +1432,7 @@
       evento.resultado = 'erro';
       evento.status = 'resolvido';
       atualizarPontuacaoUI();
-      atualizarBanner('Decisão inadequada: operador bloqueado por 60 segundos.', '#ef4444');
+      atualizarBanner('Decisão inadequada: operador bloqueado por 35 segundos.', '#ef4444');
       aplicarBloqueioOperador('Decisão operacional inadequada.', evento.origemTab || 'mod-malha');
     }
 
@@ -2476,7 +2476,7 @@
     }
 
     gameState.bloqueiosPorAba[alvo] = {
-      deadline: agora + 60000,
+      deadline: agora + 35000,
       motivo: motivo || 'Decisão operacional inadequada.'
     };
 
