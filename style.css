@@ -622,6 +622,9 @@
       transition: all 0.2s;
     }
 
+    /* O protocolo de segurança por IA só existe na página 4; nas demais permanece oculto. */
+    #btn-action-2 { display: none; }
+
     .btn-simular:hover { background: #dc2626; transform: translateY(-1px); box-shadow: 0 6px 14px rgba(239, 68, 68, .28); }
     .btn-safe { background: #10b981; }
     .btn-safe:hover { background: #059669; transform: translateY(-1px); box-shadow: 0 6px 14px rgba(16, 185, 129, .28); }
