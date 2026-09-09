@@ -1658,7 +1658,7 @@
       icon: '📚', title: 'Explore as simulações',
       text: 'As quatro primeiras abas são módulos de treinamento. Cada uma apresenta situações diferentes para você praticar antes ou durante o Game.',
       target: '.nav-tabs',
-      extra: '<div class="cco-tutorial-tip"><strong>1. Malha & RAMP</strong> — fluxo e capacidade operacional.</div><div class="cco-tutorial-tip"><strong>2. IA Preditiva</strong> — leitura de sinais e anomalias.</div><div class="cco-tutorial-tip"><strong>3. Eco-Driving</strong> — eficiência e condução.</div><div class="cco-tutorial-tip"><strong>4. Prevenção Descarrilamento</strong> — segurança e integridade.</div>'
+      extra: '<div class="cco-tutorial-tip"><strong>1. Malha & RAMP</strong> — fluxo e capacidade operacional.</div><div class="cco-tutorial-tip"><strong>2. IA Preditiva</strong> — leitura de sinais e anomalias.</div><div class="cco-tutorial-tip"><strong>3. Eco-Driving</strong> — eficiência e condução.</div><div class="cco-tutorial-tip"><strong>4. Prevenção Descarrilamento</strong> — segurança e integridade.</div><div class="cco-tutorial-tip"><strong>Game:</strong> aguarde o Administrador iniciar o GAME para receber os cards de incidentes. Enquanto isso, aproveite para testar as simulações.</div>'
     },
     {
       icon: '🚨', title: 'Analise cada ocorrência',
@@ -1776,11 +1776,9 @@
   document.addEventListener('DOMContentLoaded', () => {
     const next = document.getElementById('cco-tutorial-next');
     const prev = document.getElementById('cco-tutorial-prev');
-    const skip = document.getElementById('cco-tutorial-skip');
     const overlay = document.getElementById('cco-tutorial-overlay');
     if (next) next.addEventListener('click', avancarTutorialCCO);
     if (prev) prev.addEventListener('click', voltarTutorialCCO);
-    if (skip) skip.addEventListener('click', fecharTutorialCCO);
     if (overlay) {
       overlay.addEventListener('click', e => {
         if (e.target.classList.contains('cco-tutorial-backdrop')) fecharTutorialCCO();
@@ -2002,16 +2000,6 @@
         title: 'Sessão do Administrador',
         text: 'Sessão iniciada como ADMINISTRADOR. Você tem permissão para iniciar e parar as simulações.',
         icon: 'success',
-        confirmButtonText: 'OK',
-        background: '#0f172a',
-        color: '#f8fafc',
-        confirmButtonColor: '#0284c7'
-      });
-    } else {
-      Swal.fire({
-        title: 'Aviso GAME interativo',
-        text: 'Aguarde o Administrador iniciar o GAME para receber os cards de incidentes. Enquanto isso, aproveite para testar as simulações.',
-        icon: 'info',
         confirmButtonText: 'OK',
         background: '#0f172a',
         color: '#f8fafc',

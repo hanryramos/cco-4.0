@@ -1984,14 +1984,14 @@ html,body { max-width:100%; overflow-x:hidden; }
   line-height:1.5;
 }
 .cco-tutorial-tip strong { color:#7dd3fc; }
-.cco-tutorial-actions { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:24px; }
+.cco-tutorial-actions { display:flex; justify-content:center; align-items:center; gap:12px; margin-top:24px; }
 .cco-tutorial-nav { display:flex; gap:8px; }
-.cco-tutorial-skip, .cco-tutorial-prev, .cco-tutorial-next {
+.cco-tutorial-prev, .cco-tutorial-next {
   border:1px solid #334155; border-radius:8px; padding:10px 14px; font-weight:800; cursor:pointer;
 }
-.cco-tutorial-skip, .cco-tutorial-prev { background:#111827; color:#cbd5e1; }
+.cco-tutorial-prev { background:#111827; color:#cbd5e1; }
 .cco-tutorial-next { background:#0284c7; border-color:#0284c7; color:#fff; }
-.cco-tutorial-skip:hover, .cco-tutorial-prev:hover { border-color:#64748b; }
+.cco-tutorial-prev:hover { border-color:#64748b; }
 .cco-tutorial-next:hover { background:#0369a1; }
 .cco-tutorial-never { margin-top:16px; display:flex; align-items:center; gap:8px; color:#94a3b8; font-size:11px; cursor:pointer; }
 .cco-tutorial-never input { accent-color:#0284c7; }
