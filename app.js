@@ -443,6 +443,16 @@
   function switchTab(tabId, element) {
     currentTab = tabId;
 
+    // Feedback de "carregamento" sutil ao trocar de módulo.
+    const loader = document.getElementById('module-loader');
+    if (loader) {
+      loader.classList.remove('visible');
+      void loader.offsetWidth;
+      loader.classList.add('visible');
+      clearTimeout(loader._shimmerT);
+      loader._shimmerT = setTimeout(() => loader.classList.remove('visible'), 600);
+    }
+
     const tabButtons = document.querySelectorAll('.tab-btn');
     tabButtons.forEach(btn => btn.classList.remove('active'));
 
@@ -2369,10 +2379,18 @@
     }, 250);
   }
 
+  function formatarNumero(valor) {
+    try {
+      return Number(valor || 0).toLocaleString('pt-BR');
+    } catch (e) {
+      return String(valor || 0);
+    }
+  }
+
   function atualizarPontuacaoUI() {
     const scoreEl = document.getElementById('user-score');
     if (scoreEl) {
-      const novoValor = String(gameState.pontuacao);
+      const novoValor = formatarNumero(gameState.pontuacao);
       if (scoreEl.innerText !== novoValor) {
         scoreEl.innerText = novoValor;
         scoreEl.classList.remove('score-pop');

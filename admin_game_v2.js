@@ -40,6 +40,11 @@ const adminState = {
 
 const $ = id => document.getElementById(id);
 
+function fm(valor) {
+  try { return Number(valor || 0).toLocaleString('pt-BR'); }
+  catch (e) { return String(valor || 0); }
+}
+
 function esc(value) {
   return String(value ?? '').replace(/[&<>"']/g, char => ({
     '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#039;'
@@ -131,7 +136,7 @@ function renderRanking() {
       const status = op.status === 'online' ? 'ONLINE' : 'OFFLINE';
       return `<tr class="operator-row ${adminState.selectedOperatorKey === op.key ? 'selected' : ''}" data-key="${esc(op.key)}" tabindex="0">
         <td><strong>${esc(op.name)}</strong><br><small>${status}</small></td>
-        <td>${esc(op.email)}</td><td>${op.correct||0}</td><td>${op.wrong||0}</td><td>${accuracy}%</td><td><strong>${Number(op.points||0)}</strong></td>
+        <td>${esc(op.email)}</td><td>${op.correct||0}</td><td>${op.wrong||0}</td><td>${accuracy}%</td><td><strong>${fm(op.points)}</strong></td>
         <td><button type="button" class="detail-operator-btn" data-detail-key="${esc(op.key)}">Ver detalhes</button></td>
       </tr>`;
     }).join('');
@@ -221,7 +226,7 @@ function renderAdminChallenges() {
     const selected=adminState.selectedChallengeId===id;
     const vencedor=d.vencedorUid ? (d.vencedorUid===d.desafianteUid?d.desafianteNome:d.desafiadoNome) : '';
     const detalhe=selected?`<div class="challenge-admin-detail"><strong>${esc(d.desafianteNome||'Operador')}</strong>: ${Number(a.pontos||0)} pts · ${Number(a.acertos||0)} acertos · ${Number(a.erros||0)} erros<br><strong>${esc(d.desafiadoNome||'Operador')}</strong>: ${Number(b.pontos||0)} pts · ${Number(b.acertos||0)} acertos · ${Number(b.erros||0)} erros<br>Repasse configurado: ${Number(d.percentual||0)*100}%${d.status==='finished'?` · Resultado: ${vencedor?esc(vencedor):'Empate'}${d.repasse?` · Repasse: ${Number(d.repasse)} pts`:''}`:''}</div>`:'';
-    return `<div class="challenge-admin-item" data-challenge-id="${esc(id)}"><div class="challenge-admin-top"><span class="challenge-admin-names">${esc(d.desafianteNome||'Operador')} ⚔️ ${esc(d.desafiadoNome||'Operador')}</span><span class="challenge-admin-status ${esc(d.status||'')}">${desafioStatusLabel(d.status)}</span></div><div class="challenge-admin-meta"><span>${Number(d.rodadas||10)} ocorrências</span><span>Repasse: ${Number(d.percentual||0)*100}%</span><span class="challenge-admin-score">${Number(a.pontos||0)} × ${Number(b.pontos||0)} pts</span></div>${detalhe}</div>`;
+    return `<div class="challenge-admin-item" data-challenge-id="${esc(id)}"><div class="challenge-admin-top"><span class="challenge-admin-names">${esc(d.desafianteNome||'Operador')} ⚔️ ${esc(d.desafiadoNome||'Operador')}</span><span class="challenge-admin-status ${esc(d.status||'')}">${desafioStatusLabel(d.status)}</span></div><div class="challenge-admin-meta"><span>${Number(d.rodadas||10)} ocorrências</span><span>Repasse: ${Number(d.percentual||0)*100}%</span><span class="challenge-admin-score">${fm(a.pontos)} × ${fm(b.pontos)} pts</span></div>${detalhe}</div>`;
   }).join('');
   box.querySelectorAll('[data-challenge-id]').forEach(el=>el.addEventListener('click',()=>{const id=el.dataset.challengeId;adminState.selectedChallengeId=adminState.selectedChallengeId===id?null:id;renderAdminChallenges();}));
 }

@@ -17,6 +17,17 @@
       overflow: hidden;
     }
 
+    :focus-visible {
+      outline: 2px solid rgba(0, 242, 254, .65);
+      outline-offset: 2px;
+    }
+
+    button:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+      filter: saturate(.7);
+    }
+
     .cco-container {
       width: 100vw;
       height: 100vh;
@@ -268,6 +279,12 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .card:hover {
+      border-color: #2b3b57;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35), 0 0 12px rgba(56, 189, 248, 0.06);
     }
 
     .card-header { display: flex; justify-content: space-between; align-items: center; }
@@ -1507,6 +1524,47 @@ body.operator-is-blocked { overflow: hidden; }
 .game-rules-session{font-size:.72rem;color:#64748b;margin-bottom:16px}
 .game-rules-session span{color:#94a3b8;font-family:monospace}
 .btn-game-rules-confirm{position:relative;z-index:2147483002;pointer-events:auto;touch-action:manipulation;width:100%;border:0;border-radius:9px;padding:13px;background:#0284c7;color:#fff;font-weight:800;font-size:.9rem;cursor:pointer;transition:.2s}
+
+/* Loader de transição entre módulos (shimmer) */
+.module-loader {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(105deg,
+    transparent 40%,
+    rgba(56, 189, 248, 0.10) 50%,
+    transparent 60%);
+  background-size: 250% 100%;
+}
+
+.module-loader.visible {
+  opacity: 1;
+  animation: shimmerSweep .55s ease-in forwards;
+}
+
+@keyframes shimmerSweep {
+  from { background-position: 130% 0; }
+  to   { background-position: -130% 0; }
+}
+
+/* Scrollbars discretas nas áreas de conteúdo */
+.dashboard-grid,
+.ia-dashboard,
+.cco-notifications-sidebar {
+  scrollbar-width: thin;
+  scrollbar-color: #1e293b transparent;
+}
+.dashboard-grid::-webkit-scrollbar,
+.ia-dashboard::-webkit-scrollbar,
+.cco-notifications-sidebar::-webkit-scrollbar { width: 8px; }
+.dashboard-grid::-webkit-scrollbar-thumb,
+.ia-dashboard::-webkit-scrollbar-thumb,
+.cco-notifications-sidebar::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+.dashboard-grid::-webkit-scrollbar-thumb:hover,
+.ia-dashboard::-webkit-scrollbar-thumb:hover,
+.cco-notifications-sidebar::-webkit-scrollbar-thumb:hover { background: #334155; }
 .btn-game-rules-confirm:hover{background:#0369a1}
 @media(max-width:650px){.game-rules-grid{grid-template-columns:1fr}.game-rules-card{padding:20px}}
 
@@ -1795,10 +1853,41 @@ html,body { max-width:100%; overflow-x:hidden; }
 /* ==========================================================================
    REPASSE — DESAFIO
    ========================================================================== */
-.cco-challenge-trigger{margin-left:8px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.07);color:#fff;border-radius:10px;padding:9px 12px;font-weight:800;cursor:pointer}
-.cco-challenge-trigger:hover{background:rgba(255,255,255,.14)}
-.cco-logout-trigger{margin-left:8px;border:1px solid rgba(239,68,68,.35);background:rgba(239,68,68,.08);color:#fca5a5;border-radius:10px;padding:9px 12px;font-weight:800;cursor:pointer;transition:.2s}
-.cco-logout-trigger:hover{background:rgba(239,68,68,.2);color:#fff;border-color:rgba(239,68,68,.7)}
+.cco-challenge-trigger{
+  border: 1px solid rgba(56, 189, 248, .30);
+  background: rgba(15, 23, 42, .82);
+  color: #cbd5e1;
+  border-radius: 6px;
+  padding: 6px 9px;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: .2s ease;
+}
+.cco-challenge-trigger:hover { border-color: #38bdf8; color: #fff; transform: translateY(-1px); box-shadow: 0 0 10px rgba(56,189,248,.15); }
+.cco-logout-trigger {
+  border: 1px solid rgba(239, 68, 68, .35);
+  background: rgba(15, 23, 42, .82);
+  color: #fca5a5;
+  border-radius: 6px;
+  padding: 6px 9px;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: .2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  line-height: 1;
+}
+.cco-logout-trigger:hover {
+  border-color: rgba(239, 68, 68, .7);
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 0 12px rgba(239, 68, 68, .25);
+}
 
 /* Animações de placar e badge */
 .score-pop { animation: scorePop .4s ease; display:inline-block; }
