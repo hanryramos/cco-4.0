@@ -432,6 +432,9 @@
     }
 
     inicializarTelaLogin();
+
+    atualizarTabSlider();
+    window.addEventListener('resize', () => { atualizarTabSlider(); });
   });
 
   /* ==========================================================================
@@ -477,6 +480,23 @@
 
     updateUIForCurrentTab();
     atualizarBloqueioVisual();
+    atualizarTabSlider();
+  }
+
+  function atualizarTabSlider() {
+    const nav = document.querySelector('.nav-tabs');
+    const slider = document.getElementById('tab-slider');
+    if (!nav || !slider) return;
+
+    const activeBtn = nav.querySelector('.tab-btn.active');
+    if (!activeBtn) {
+      slider.style.opacity = '0';
+      return;
+    }
+
+    slider.style.opacity = '1';
+    slider.style.left = activeBtn.offsetLeft + 'px';
+    slider.style.width = activeBtn.offsetWidth + 'px';
   }
 
   function updateUIForCurrentTab() {
@@ -980,6 +1000,8 @@
     atualizarStatusCentralCCO();
   }
 
+  let ultimoBadgeCount = 0;
+
   function renderizarEventosCCO() {
     const container = document.getElementById('notifications-container');
     if (!container) return;
@@ -992,7 +1014,13 @@
     if (badgeCCO) {
       badgeCCO.innerText = notificationCount;
       badgeCCO.style.display = notificationCount ? 'inline-block' : 'none';
+      if (notificationCount > ultimoBadgeCount) {
+        badgeCCO.classList.remove('badge-pop');
+        void badgeCCO.offsetWidth;
+        badgeCCO.classList.add('badge-pop');
+      }
     }
+    ultimoBadgeCount = notificationCount;
     if (sidebarBadge) sidebarBadge.innerText = `${notificationCount} Ativos`;
 
     if (!ccoEvents.length) {
@@ -1821,6 +1849,35 @@
     }
   }
 
+  function realizarLogout() {
+    function efetuarLogout() {
+      if (gameState.intervaloCards) clearInterval(gameState.intervaloCards);
+      if (typeof timeoutProximoCard !== 'undefined' && timeoutProximoCard) clearTimeout(timeoutProximoCard);
+      if (typeof ccoDecisionTimer !== 'undefined' && ccoDecisionTimer) clearInterval(ccoDecisionTimer);
+      if (typeof ccoAssumeTimer !== 'undefined' && ccoAssumeTimer) clearInterval(ccoAssumeTimer);
+      if (typeof bloqueioInterval !== 'undefined' && bloqueioInterval) clearInterval(bloqueioInterval);
+      window.location.reload();
+    }
+
+    if (window.Swal) {
+      Swal.fire({
+        title: 'Encerrar sessão?',
+        text: 'Sua sessão será encerrada e a tela voltará para o login.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Sair',
+        cancelButtonText: 'Cancelar',
+        background: '#0f172a',
+        color: '#f8fafc',
+        confirmButtonColor: '#dc2626'
+      }).then(result => {
+        if (result.isConfirmed) efetuarLogout();
+      });
+    } else {
+      efetuarLogout();
+    }
+  }
+
   function adminIniciarSimulacao() {
     if (!gameState.isAdmin) return;
     if (gameState.emExecucao) {
@@ -2314,7 +2371,15 @@
 
   function atualizarPontuacaoUI() {
     const scoreEl = document.getElementById('user-score');
-    if (scoreEl) scoreEl.innerText = gameState.pontuacao;
+    if (scoreEl) {
+      const novoValor = String(gameState.pontuacao);
+      if (scoreEl.innerText !== novoValor) {
+        scoreEl.innerText = novoValor;
+        scoreEl.classList.remove('score-pop');
+        void scoreEl.offsetWidth;
+        scoreEl.classList.add('score-pop');
+      }
+    }
     if (gameState.operador) {
       atualizarRanking(gameState.operador, gameState.pontuacao);
     }

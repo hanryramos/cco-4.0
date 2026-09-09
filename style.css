@@ -57,31 +57,73 @@
       display: flex;
       gap: 6px;
       flex-wrap: wrap;
-    }
-
-    .tab-btn {
-      background: #0f172a;
-      color: #94a3b8;
-      border: 1px solid #1e293b;
-      padding: 8px 14px;
-      border-radius: 6px;
-      font-size: clamp(11px, 1vw, 13px);
-      cursor: pointer;
-      font-weight: bold;
-      transition: all 0.2s;
       position: relative;
     }
 
+    .tab-slider {
+      position: absolute;
+      bottom: 2px;
+      height: 2px;
+      border-radius: 2px;
+      background: #00f2fe;
+      box-shadow: 0 0 8px #00f2fe;
+      transform: translateX(0);
+      transition: left 0.25s ease, width 0.25s ease;
+      pointer-events: none;
+    }
+
+    .tab-btn {
+      background: linear-gradient(180deg, #0f172a 0%, #0b1222 100%);
+      color: #94a3b8;
+      border: 1px solid #1e293b;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: clamp(11px, 1vw, 13px);
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
     .tab-btn:hover {
-      background: #1e293b;
-      color: #f8fafc;
+      background: #16233d;
+      color: #e2e8f0;
+      border-color: #334155;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
     }
 
     .tab-btn.active {
-      background: #0284c7;
+      background: linear-gradient(180deg, #0369a1 0%, #0284c7 100%);
       color: #ffffff;
       border-color: #38bdf8;
-      box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+      box-shadow: 0 0 14px rgba(56, 189, 248, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      transform: translateY(-1px);
+    }
+
+    .tab-btn::before {
+      content: "";
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      margin-right: 6px;
+      background: #475569;
+      vertical-align: middle;
+      box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+      transition: transform 0.2s ease;
+    }
+
+    .nav-tabs .tab-btn:nth-child(1)::before { background: #22c55e; }
+    .nav-tabs .tab-btn:nth-child(2)::before { background: #8b5cf6; }
+    .nav-tabs .tab-btn:nth-child(3)::before { background: #10b981; }
+    .nav-tabs .tab-btn:nth-child(4)::before { background: #ef4444; }
+    .nav-tabs .tab-btn:nth-child(5)::before { background: #f59e0b; }
+
+    .tab-btn.active::before {
+      background: #ffffff;
+      transform: scale(1.25);
+      box-shadow: 0 0 8px #ffffff;
     }
 
     .tab-cco-btn {
@@ -125,6 +167,20 @@
     .module.active {
       display: flex;
       flex-direction: column;
+      animation: moduleFadeIn 0.28s ease-out;
+    }
+
+    @keyframes moduleFadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
     }
 
     svg {
@@ -1559,6 +1615,9 @@ body.operator-is-blocked { overflow: hidden; }
 /* ETAPA 36 — layout responsivo */
 html,body { max-width:100%; overflow-x:hidden; }
 .nav-tabs { overflow-x:auto; scrollbar-width:thin; -webkit-overflow-scrolling:touch; }
+.nav-tabs::-webkit-scrollbar { height: 6px; }
+.nav-tabs::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+.nav-tabs::-webkit-scrollbar-thumb:hover { background: #334155; }
 .nav-tabs .tab-btn { flex:0 0 auto; }
 .game-card { box-sizing:border-box; }
 @media(max-width:700px){
@@ -1738,6 +1797,23 @@ html,body { max-width:100%; overflow-x:hidden; }
    ========================================================================== */
 .cco-challenge-trigger{margin-left:8px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.07);color:#fff;border-radius:10px;padding:9px 12px;font-weight:800;cursor:pointer}
 .cco-challenge-trigger:hover{background:rgba(255,255,255,.14)}
+.cco-logout-trigger{margin-left:8px;border:1px solid rgba(239,68,68,.35);background:rgba(239,68,68,.08);color:#fca5a5;border-radius:10px;padding:9px 12px;font-weight:800;cursor:pointer;transition:.2s}
+.cco-logout-trigger:hover{background:rgba(239,68,68,.2);color:#fff;border-color:rgba(239,68,68,.7)}
+
+/* Animações de placar e badge */
+.score-pop { animation: scorePop .4s ease; display:inline-block; }
+@keyframes scorePop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.3); color: #fbbf24; }
+  100% { transform: scale(1); }
+}
+
+.badge-pop { animation: badgePop .45s cubic-bezier(.2,.9,.3,1.4); }
+@keyframes badgePop {
+  0%   { transform: scale(.5); }
+  55%  { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
 .challenge-dialog{border:0;padding:0;background:transparent;color:#eaf2f8;width:min(720px,94vw);max-width:720px}
 .challenge-dialog::backdrop{background:rgba(2,7,14,.78);backdrop-filter:blur(5px)}
 .challenge-shell{background:#0b1520;border:1px solid rgba(255,255,255,.14);border-radius:20px;box-shadow:0 25px 90px rgba(0,0,0,.55);overflow:hidden}
@@ -1777,7 +1853,7 @@ html,body { max-width:100%; overflow-x:hidden; }
 .challenge-option.selected{outline:2px solid #8fd1ff;background:#17364a}
 .challenge-card-footer{display:flex;justify-content:space-between;align-items:center;margin-top:15px}
 .challenge-card-footer span{font-size:20px;font-weight:1000}
-@media(max-width:650px){.user-header-group{flex-wrap:wrap}.cco-challenge-trigger{margin-left:0}.challenge-match-head{grid-template-columns:1fr 45px 1fr}.challenge-header h2{font-size:19px}}
+@media(max-width:650px){.user-header-group{flex-wrap:wrap}.cco-challenge-trigger{margin-left:0}.cco-logout-trigger{margin-left:0}.challenge-match-head{grid-template-columns:1fr 45px 1fr}.challenge-header h2{font-size:19px}}
 
 
 /* REPASSE — feedback de pontuação */
