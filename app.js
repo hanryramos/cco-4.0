@@ -806,6 +806,8 @@
     }
   }
 
+  let alertaDescarrilamentoTimeout = null;
+
   function simularModuloDescarrilamento(isSafe) {
     const sparks = document.getElementById('sparks-group');
     const vibrationWrapper = document.getElementById('train-vibration-wrapper');
@@ -860,7 +862,10 @@
         vibrationChart.update();
       }
 
-      dispararAlerta(ocorrencia.titulo, ocorrencia.mensagem, ocorrencia);
+      if (alertaDescarrilamentoTimeout) clearTimeout(alertaDescarrilamentoTimeout);
+      alertaDescarrilamentoTimeout = setTimeout(() => {
+        dispararAlerta(ocorrencia.titulo, ocorrencia.mensagem, ocorrencia);
+      }, 3800);
       atualizarBanner(ocorrencia.banner, critical ? '#ef4444' : '#f59e0b');
     } else {
       esconderExplosaoTrem();
@@ -977,20 +982,19 @@
   }
 
   function explodirTrem() {
-    const wrapper = document.getElementById('train-vibration-wrapper');
     const loco = document.getElementById('vale-locomotive');
     const explosao = document.getElementById('train-explosion');
-    // Zera a inclinação do tombamento para a explosão aparecer "em pé".
-    if (wrapper) wrapper.classList.remove('derailed');
-    if (loco) loco.style.visibility = 'hidden';
+    // Mantém o tombamento: o vagão fica tombado na via como destroço, com fogo por cima.
+    if (loco) loco.classList.add('train-wrecked');
     if (explosao) explosao.style.display = 'block';
     atualizarBanner('💥 Descarrilamento crítico — a locomotiva explodiu! Composição fora de operação.', '#ef4444');
   }
 
   function esconderExplosaoTrem() {
+    if (alertaDescarrilamentoTimeout) { clearTimeout(alertaDescarrilamentoTimeout); alertaDescarrilamentoTimeout = null; }
     const loco = document.getElementById('vale-locomotive');
     const explosao = document.getElementById('train-explosion');
-    if (loco) loco.style.visibility = '';
+    if (loco) loco.classList.remove('train-wrecked');
     if (explosao) explosao.style.display = 'none';
   }
 
