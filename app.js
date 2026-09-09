@@ -835,9 +835,13 @@
       wheels.forEach(w => w.style.animationPlayState = 'paused');
       tracks.forEach(t => t.style.animationPlayState = 'paused');
       if (vibrationWrapper) {
-        vibrationWrapper.classList.remove('shaking');
+        esconderExplosaoTrem();
+        vibrationWrapper.classList.remove('shaking', 'derailed');
+        void vibrationWrapper.offsetWidth;
         vibrationWrapper.classList.add('derailed');
         vibrationWrapper.style.animationPlayState = 'running';
+        vibrationWrapper.removeEventListener('animationend', aoTerminarDescarrilamento);
+        vibrationWrapper.addEventListener('animationend', aoTerminarDescarrilamento);
       }
 
       if (cardBogieStatus) { cardBogieStatus.innerText = critical ? 'Crítico' : 'Alerta'; cardBogieStatus.className = 'badge'; cardBogieStatus.style.background = critical ? '#ef4444' : '#f59e0b'; cardBogieStatus.style.color = '#fff'; }
@@ -859,6 +863,7 @@
       dispararAlerta(ocorrencia.titulo, ocorrencia.mensagem, ocorrencia);
       atualizarBanner(ocorrencia.banner, critical ? '#ef4444' : '#f59e0b');
     } else {
+      esconderExplosaoTrem();
       if (sparks) sparks.style.display = 'none';
       if (vibrationWrapper) { vibrationWrapper.classList.remove('shaking', 'derailed'); vibrationWrapper.style.animationPlayState = 'running'; }
       if (bogieStructure) bogieStructure.classList.remove('bogie-critical');
@@ -888,6 +893,7 @@
 
     if (sparks) sparks.style.display = 'none';
     if (vibrationWrapper) {
+      esconderExplosaoTrem();
       vibrationWrapper.classList.remove('shaking', 'derailed');
       vibrationWrapper.style.animationPlayState = 'paused';
     }
@@ -951,6 +957,7 @@
   }
 
   function retomarAnimacaoTrem() {
+    esconderExplosaoTrem();
     const trainGroup = document.getElementById('train-2d-group');
     const vibrationWrapper = document.getElementById('train-vibration-wrapper');
     const wheels = document.querySelectorAll('.wheel-rotate');
@@ -960,6 +967,31 @@
     if (vibrationWrapper) { vibrationWrapper.classList.remove('shaking', 'derailed'); vibrationWrapper.style.animationPlayState = 'running'; }
     wheels.forEach(wheel => wheel.style.animationPlayState = 'running');
     tracks.forEach(track => track.style.animationPlayState = 'running');
+  }
+
+  /* --- EXPLOSÃO DA LOCOMOTIVA (fim da animação de descarrilamento) --- */
+  function aoTerminarDescarrilamento(event) {
+    if (event && event.animationName === 'tombamentoTrem') {
+      explodirTrem();
+    }
+  }
+
+  function explodirTrem() {
+    const wrapper = document.getElementById('train-vibration-wrapper');
+    const loco = document.getElementById('vale-locomotive');
+    const explosao = document.getElementById('train-explosion');
+    // Zera a inclinação do tombamento para a explosão aparecer "em pé".
+    if (wrapper) wrapper.classList.remove('derailed');
+    if (loco) loco.style.visibility = 'hidden';
+    if (explosao) explosao.style.display = 'block';
+    atualizarBanner('💥 Descarrilamento crítico — a locomotiva explodiu! Composição fora de operação.', '#ef4444');
+  }
+
+  function esconderExplosaoTrem() {
+    const loco = document.getElementById('vale-locomotive');
+    const explosao = document.getElementById('train-explosion');
+    if (loco) loco.style.visibility = '';
+    if (explosao) explosao.style.display = 'none';
   }
 
   gameChannel.onmessage = (event) => {
