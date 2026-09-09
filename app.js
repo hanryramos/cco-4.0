@@ -429,6 +429,16 @@
         retomarAnimacaoTrem();
       });
     }
+
+    const loginInput = document.getElementById('game-user-email');
+    if (loginInput) {
+      loginInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          realizarLoginGame();
+        }
+      });
+    }
   });
 
   /* ==========================================================================
