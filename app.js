@@ -14,6 +14,7 @@
 
   const gameState = {
     operador: '',
+    operadorNome: '',
     isAdmin: false,
     emExecucao: false,
     pontuacao: 0,
@@ -1659,6 +1660,10 @@
       : userEmail === 'adm@vale.com';
 
     gameState.operador = userEmail;
+    gameState.operadorNome = (usuarioFirebase?.nome || userEmail.split('@')[0])
+      .split('.')
+      .map(p => p ? p.charAt(0).toUpperCase() + p.slice(1) : p)
+      .join(' ');
     const modalLogin = document.getElementById('game-login-modal');
     if (modalLogin) modalLogin.style.display = 'none';
 
@@ -1676,7 +1681,8 @@
 
       const userTag = document.getElementById('user-operator-tag');
       if (userTag) {
-        userTag.innerText = `PLATAFORMA INTEGRADA CCO 4.0 | OPERADOR: ${userEmail}`;
+        const nomeExibido = gameState.operadorNome || userEmail;
+        userTag.innerText = `PLATAFORMA INTEGRADA CCO 4.0 | OPERADOR: ${nomeExibido} (${userEmail})`;
       }
 
       // Conecta este operador ao Firebase para sincronizar presença e pontos.
@@ -2299,8 +2305,9 @@ async function buscarUsuarioFirebase(email) {
 }
 
 // Se o nó /usuarios ainda não existir no Realtime Database (primeira vez),
-// cria-o a partir da lista de permissões atual. Assim o login passa a ser
-// gerenciado pelo Firebase em vez de depender da whitelist do código.
+// cria-o a partir da lista de permissões atual. As regras do Firebase permitem
+// somente a criação (enquanto o nó não existir); depois disso a lista é travada
+// e novos usuários devem ser adicionados pelo console do Firebase.
 async function sembrarUsuariosFirebaseSeNecessario() {
   if (!window.ccoFirebase || !window.ccoFirebase.db || !window.ccoFirebase.ready) return null;
   try {

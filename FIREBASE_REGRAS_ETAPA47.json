@@ -2,7 +2,7 @@
   "rules": {
     "usuarios": {
       ".read": "auth != null",
-      ".write": "auth != null"
+      ".write": "!data.exists()"
     },
     "operadores": {
       ".read": "auth != null",

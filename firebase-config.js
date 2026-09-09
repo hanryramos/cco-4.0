@@ -23,4 +23,19 @@ window.ccoFirebase = {
 
 // Login anônimo só para o primeiro teste. Depois vamos trocar por uma
 // autenticação adequada para diferenciar operador e ADM com regras seguras.
-window.ccoFirebase.ready = window.ccoFirebase.auth.signInAnonymously();
+window.ccoFirebase.ready = window.ccoFirebase.auth.signInAnonymously()
+  .catch(error => {
+    console.error('[CCO 4.0] Falha na autenticação anônima do Firebase:', error);
+    if (window.Swal) {
+      Swal.fire({
+        title: 'Sem conexão com o Firebase',
+        text: 'Não foi possível autenticar com o Firebase. Verifique se o acesso anônimo está habilitado no console do projeto.',
+        icon: 'error',
+        confirmButtonText: 'OK',
+        background: '#0f172a',
+        color: '#f8fafc',
+        confirmButtonColor: '#0284c7'
+      });
+    }
+    return Promise.reject(error);
+  });
