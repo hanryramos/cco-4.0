@@ -2155,7 +2155,6 @@ html,body { max-width:100%; overflow-x:hidden; }
 .challenge-feedback.is-correct strong,.challenge-feedback.is-correct span{color:#5fe0a5}
 .challenge-feedback.is-wrong{border-color:#9b3944}
 .challenge-feedback.is-wrong strong,.challenge-feedback.is-wrong span{color:#ff7d89}
-
 /* ==========================================================================
    EXPLOSÃO DO TREM — fim da animação de descarrilamento (Módulo 4)
    ========================================================================== */
