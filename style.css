@@ -285,6 +285,60 @@
       stroke: #ef4444;
       stroke-dasharray: 4;
       display: none;
+      animation: zonePulse 1s ease-in-out infinite, zoneMarch 1.2s linear infinite;
+    }
+
+    @keyframes zonePulse {
+      0%, 100% { opacity: .55; }
+      50%      { opacity: 1; }
+    }
+
+    @keyframes zoneMarch {
+      to { stroke-dashoffset: -8; }
+    }
+
+    /* Pulso de energia percorrendo a via do RAMP durante a simulação */
+    .ramp-pulse {
+      fill: none;
+      stroke-width: 5px;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke: #fbbf24;
+      stroke-dasharray: 0.03 0.97;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .ramp-pulse.active {
+      animation: rampBurst 1.2s ease-in-out forwards;
+      opacity: 1;
+    }
+
+    @keyframes rampBurst {
+      0%   { stroke-dashoffset: 0; opacity: 0; }
+      12%  { opacity: 1; }
+      85%  { opacity: 1; }
+      100% { stroke-dashoffset: -1; opacity: 0; }
+    }
+
+    /* Surge único quando uma simulação é executada na Malha & RAMP */
+    #mod-malha.sim-pulse .track-active {
+      animation: trackFlow 20s linear infinite, trackSurge 1.1s ease-in-out;
+    }
+
+    @keyframes trackSurge {
+      0%   { filter: none; stroke-width: 2.5px; opacity: 1; }
+      40%  { filter: drop-shadow(0 0 6px #00f2fe); stroke-width: 4px; opacity: .85; }
+      100% { filter: none; stroke-width: 2.5px; opacity: 1; }
+    }
+
+    /* Tremor na malha em caso de congestionamento */
+    #mod-malha.sim-shake { animation: malhaShake .4s ease; }
+
+    @keyframes malhaShake {
+      0%, 100% { transform: none; }
+      25%      { transform: translateX(-3px); }
+      75%      { transform: translateX(3px); }
     }
 
     .dashboard-grid {

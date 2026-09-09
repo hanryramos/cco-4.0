@@ -643,12 +643,40 @@
 
     if (isCurrentTabBlocked()) return;
 
+    // Animação de energia ao longo da via do RAMP a cada ação.
+    const rampPulse = document.getElementById('ramp-pulse');
+    if (rampPulse) {
+      const corPulso = isSafe ? '#10b981' : '#fbbf24';
+      rampPulse.style.stroke = corPulso;
+      rampPulse.style.filter = `drop-shadow(0 0 6px ${corPulso})`;
+      rampPulse.classList.remove('active');
+      void rampPulse.offsetWidth;
+      rampPulse.classList.add('active');
+    }
+
+    // Surge momentâneo em todas as vias da malha.
+    const modMalha = document.getElementById('mod-malha');
+    if (modMalha) {
+      modMalha.classList.remove('sim-pulse');
+      void modMalha.offsetWidth;
+      modMalha.classList.add('sim-pulse');
+      clearTimeout(modMalha._surgeT);
+      modMalha._surgeT = setTimeout(() => modMalha.classList.remove('sim-pulse'), 1300);
+    }
+
     if (!isSafe) {
       const ocorrencia = sortearOcorrencia('mod-malha');
       if (!ocorrencia) return;
 
       if (rampTrack) rampTrack.setAttribute('class', ocorrencia.visual === 'ramp' ? 'track-animated track-warning' : 'track-animated track-active');
       if (rampZone) rampZone.style.display = ocorrencia.visual === 'ramp' ? 'block' : 'none';
+
+      // Tremor rápido de perturbação operacional no congestionamento.
+      if (modMalha && ocorrencia.visual === 'ramp') {
+        modMalha.classList.remove('sim-shake');
+        void modMalha.offsetWidth;
+        modMalha.classList.add('sim-shake');
+      }
 
       dispararAlerta(ocorrencia.titulo, ocorrencia.mensagem, ocorrencia);
       atualizarBanner(ocorrencia.banner, ocorrencia.dificuldade === 'critico' ? '#ef4444' : '#f59e0b');
