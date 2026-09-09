@@ -2183,15 +2183,24 @@ html,body { max-width:100%; overflow-x:hidden; }
     padding: 8px;
     border-radius: 6px;
     gap: 6px;
+    flex-shrink: 0;
   }
 
   .content-area {
     border-radius: 6px;
+    min-height: 0;
   }
 
   /* Qualquer módulo com conteúdo alto passa a rolar verticalmente no celular. */
   .module {
     overflow-y: auto;
+  }
+
+  /* O mapa (SVG) encolhe para o painel de simulação ficar visível sem rolagem. */
+  .module.active > svg {
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 120px;
   }
 
   .dashboard-grid {
