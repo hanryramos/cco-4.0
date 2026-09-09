@@ -107,7 +107,6 @@ function bloquearPainelADM() {
         input.focus();
         return;
       }
-      try { sessionStorage.setItem('cco40_admin_allowed', '1'); } catch (e) {}
       liberarPainelADM();
     } catch (e) {
       console.error('[CCO ADM] Erro ao validar acesso:', e);
@@ -868,15 +867,9 @@ function iniciarPlataformaADM() {
   if (app && app.dataset.iniciado === '1') return;
   if (app) app.dataset.iniciado = '1';
   try {
-    // Gate de acesso: se a sessão já foi liberada, mostra direto o painel;
-    // caso contrário exige e-mail admin.
-    let sessaoAdminOk = false;
-    try { sessaoAdminOk = sessionStorage.getItem('cco40_admin_allowed') === '1'; } catch (e) {}
-    if (sessaoAdminOk) {
-      liberarPainelADM();
-    } else {
-      bloquearPainelADM();
-    }
+    // Gate de acesso: o login admin vale somente para esta página; ao reabrir
+    // a Central, o e-mail de administrador é solicitado novamente.
+    bloquearPainelADM();
 
     atualizarControlesRegras();
 
