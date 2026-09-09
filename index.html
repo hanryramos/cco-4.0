@@ -12,16 +12,42 @@
 <body>
 <!-- Modal Login -->
 <div class="game-modal-overlay" id="game-login-modal">
+  <div class="game-login-bg" aria-hidden="true">
+    <div class="game-login-rail"></div>
+    <div class="game-login-train">🚂</div>
+  </div>
   <div class="game-modal-card">
-    <h2>🎮 ACESSO OPERACIONAL CCO 4.0</h2>
-    <p style="font-size: 0.85rem; color: #94a3b8;">Informe seu e-mail corporativo para ingressar na simulação.</p>
-    
+    <div class="game-login-logo"><span class="game-login-logo-icon">🎮</span><strong>CCO <em>4.0</em></strong></div>
+    <h2>ACESSO OPERACIONAL</h2>
+    <p class="game-login-subtitle">Informe seu e-mail corporativo para ingressar na simulação.</p>
+
+    <div id="game-login-error" class="game-login-error" role="alert" hidden></div>
+
     <div class="game-input-group">
       <label for="game-user-email">E-mail Corporativo Vale:</label>
-      <input type="email" id="game-user-email" placeholder="ex: nome.sobrenome@vale.com" />
+      <div class="game-input-wrap">
+        <span class="game-input-icon">✉️</span>
+        <input type="email" id="game-user-email" placeholder="nome.sobrenome" autocomplete="email" spellcheck="false" autofocus />
+        <button type="button" id="game-email-hint" class="game-email-hint" hidden>@vale.com ↵</button>
+      </div>
     </div>
 
-    <button class="btn-game-primary" onclick="realizarLoginGame()">ACESSAR SIMULADOR</button>
+    <label class="game-remember">
+      <input type="checkbox" id="game-remember-email" checked />
+      <span>Lembrar meu e-mail neste dispositivo</span>
+    </label>
+
+    <div id="game-quick-access" class="game-quick-access" hidden></div>
+
+    <button class="btn-game-primary" id="game-login-btn" onclick="realizarLoginGame()">
+      <span class="game-btn-label">ACESSAR SIMULADOR</span>
+      <span class="game-btn-spinner" hidden></span>
+    </button>
+
+    <div class="game-login-status" id="game-login-status">
+      <span class="game-status-dot pending"></span>
+      <span id="game-login-status-text">Conectando ao Firebase...</span>
+    </div>
   </div>
 </div>
 <div id="game-cards-container"></div>

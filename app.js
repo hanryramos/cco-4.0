@@ -431,15 +431,7 @@
       });
     }
 
-    const loginInput = document.getElementById('game-user-email');
-    if (loginInput) {
-      loginInput.addEventListener('keydown', e => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          realizarLoginGame();
-        }
-      });
-    }
+    inicializarTelaLogin();
   });
 
   /* ==========================================================================
@@ -1607,21 +1599,139 @@
   /* ==========================================================================
      SISTEMA DE AUTENTICAÇÃO E GAME ENGINE
      ========================================================================== */
+  function normalizarEmailDigitado(valor) {
+    let v = String(valor || '').trim().toLowerCase();
+    if (v && !v.includes('@')) v += '@vale.com';
+    return v;
+  }
+
+  function mostrarErroLogin(mensagem, inputEl) {
+    const errEl = document.getElementById('game-login-error');
+    if (errEl) {
+      errEl.textContent = mensagem;
+      errEl.hidden = false;
+    }
+    if (inputEl) inputEl.classList.add('is-invalid');
+  }
+
+  function limparErroLogin() {
+    const errEl = document.getElementById('game-login-error');
+    const inputEl = document.getElementById('game-user-email');
+    if (errEl) { errEl.textContent = ''; errEl.hidden = true; }
+    if (inputEl) inputEl.classList.remove('is-invalid');
+  }
+
+  function atualizarStatusLoginFirebase(estado, texto) {
+    const statusEl = document.getElementById('game-login-status');
+    if (!statusEl) return;
+    const dot = statusEl.querySelector('.game-status-dot');
+    const txt = document.getElementById('game-login-status-text');
+    if (dot) dot.className = 'game-status-dot ' + (estado || 'pending');
+    if (txt) txt.textContent = texto || '';
+  }
+
+  function inicializarTelaLogin() {
+    const emailInput = document.getElementById('game-user-email');
+    if (!emailInput) return;
+
+    const chkRemember = document.getElementById('game-remember-email');
+    const quickContainer = document.getElementById('game-quick-access');
+    const hintBtn = document.getElementById('game-email-hint');
+
+    // Lembrar e-mail
+    let lembrado = null;
+    try { lembrado = localStorage.getItem('cco40_login_email'); } catch (e) {}
+    if (lembrado) {
+      emailInput.value = lembrado;
+      if (chkRemember) chkRemember.checked = true;
+    }
+
+    // Acesso rápido: chips com os e-mails permitidos.
+    if (quickContainer && whitelist.length) {
+      quickContainer.innerHTML = '';
+      whitelist.forEach(email => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'quick-chip';
+        chip.textContent = email;
+        chip.title = 'Usar ' + email;
+        chip.addEventListener('click', () => {
+          emailInput.value = email;
+          emailInput.focus();
+          limparErroLogin();
+          if (hintBtn) hintBtn.hidden = true;
+        });
+        quickContainer.appendChild(chip);
+      });
+      quickContainer.hidden = false;
+    }
+
+    const atualizarHintDominio = () => {
+      if (hintBtn) hintBtn.hidden = !(emailInput.value.trim() && !emailInput.value.includes('@'));
+    };
+
+    emailInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        realizarLoginGame();
+      }
+    });
+    emailInput.addEventListener('input', () => {
+      limparErroLogin();
+      atualizarHintDominio();
+    });
+    emailInput.addEventListener('blur', () => {
+      if (emailInput.value.trim() && !emailInput.value.includes('@')) {
+        emailInput.value = normalizarEmailDigitado(emailInput.value);
+        atualizarHintDominio();
+      }
+    });
+
+    if (hintBtn) {
+      hintBtn.addEventListener('click', () => {
+        emailInput.value = normalizarEmailDigitado(emailInput.value);
+        emailInput.focus();
+        limparErroLogin();
+        atualizarHintDominio();
+      });
+    }
+
+    // Status da conexão com o Firebase.
+    atualizarStatusLoginFirebase('pending', 'Conectando ao Firebase...');
+    if (window.ccoFirebase && window.ccoFirebase.ready) {
+      Promise.resolve(window.ccoFirebase.ready)
+        .then(() => atualizarStatusLoginFirebase('online', 'Firebase conectado — validação em nuvem'))
+        .catch(() => atualizarStatusLoginFirebase('offline', 'Firebase offline — validação local (whitelist)'));
+    } else {
+      atualizarStatusLoginFirebase('offline', 'Firebase não configurado — validação local (whitelist)');
+    }
+  }
+
   async function realizarLoginGame() {
     const emailInput = document.getElementById('game-user-email');
-    const userEmail = emailInput ? emailInput.value.trim().toLowerCase() : '';
+    const userEmail = normalizarEmailDigitado(emailInput ? emailInput.value : '');
 
     if (!userEmail) {
-      alert("Por favor, digite seu e-mail corporativo.");
+      mostrarErroLogin("Por favor, digite seu e-mail corporativo.", emailInput);
+      emailInput && emailInput.focus();
       return;
     }
 
-    const btnLogar = document.querySelector('.btn-game-primary');
-    const emailOriginalBtn = btnLogar ? btnLogar.textContent : '';
-    if (btnLogar) {
-      btnLogar.disabled = true;
-      btnLogar.textContent = 'Validando acesso...';
+    const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userEmail);
+    if (!emailValido) {
+      mostrarErroLogin("Formato de e-mail inválido. Ex.: nome.sobrenome@vale.com", emailInput);
+      emailInput && emailInput.focus();
+      return;
     }
+
+    limparErroLogin();
+
+    const btnLogar = document.getElementById('game-login-btn');
+    const btnLabel = btnLogar ? btnLogar.querySelector('.game-btn-label') : null;
+    const btnSpinner = btnLogar ? btnLogar.querySelector('.game-btn-spinner') : null;
+    if (btnLogar) btnLogar.disabled = true;
+    if (btnLabel) btnLabel.textContent = 'Validando acesso...';
+    if (btnSpinner) btnSpinner.hidden = false;
 
     // 1) Tenta validar o e-mail contra o Realtime Database (/usuarios).
     let usuarioFirebase = await buscarUsuarioFirebase(userEmail);
@@ -1640,20 +1750,22 @@
     const firebaseIndisponivel = !window.ccoFirebase || !window.ccoFirebase.ready;
     const autorizadoByWhitelist = whitelist.includes(userEmail);
 
-    if (btnLogar) {
-      btnLogar.disabled = false;
-      btnLogar.textContent = emailOriginalBtn || 'ACESSAR SIMULADOR';
-    }
+    if (btnLogar) btnLogar.disabled = false;
+    if (btnSpinner) btnSpinner.hidden = true;
 
     if (usuarioFirebase) {
       if (usuarioFirebase.ativo === false) {
-        alert("Acesso negado: Este usuário está desativado no sistema.");
+        mostrarErroLogin("Acesso negado: Este usuário está desativado no sistema.", emailInput);
+        if (btnLabel) btnLabel.textContent = 'ACESSAR SIMULADOR';
         return;
       }
     } else if (firebaseIndisponivel || !autorizadoByWhitelist) {
-      alert("Acesso negado: Este e-mail não está cadastrado no sistema.");
+      mostrarErroLogin("Acesso negado: Este e-mail não está cadastrado no sistema.", emailInput);
+      if (btnLabel) btnLabel.textContent = 'ACESSAR SIMULADOR';
       return;
     }
+
+    if (btnLabel) btnLabel.textContent = 'Bem-vindo(a)!';
 
     const ehAdmin = usuarioFirebase
       ? usuarioFirebase.perfil === 'admin'
@@ -1664,6 +1776,17 @@
       .split('.')
       .map(p => p ? p.charAt(0).toUpperCase() + p.slice(1) : p)
       .join(' ');
+
+    // Lembra / esquece o e-mail neste dispositivo.
+    const chkRemember = document.getElementById('game-remember-email');
+    try {
+      if (chkRemember && chkRemember.checked) {
+        localStorage.setItem('cco40_login_email', userEmail);
+      } else {
+        localStorage.removeItem('cco40_login_email');
+      }
+    } catch (e) { /* localStorage indisponível */ }
+
     const modalLogin = document.getElementById('game-login-modal');
     if (modalLogin) modalLogin.style.display = 'none';
 
