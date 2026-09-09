@@ -60,14 +60,24 @@ function normalizarEmailAdmin(email) {
   return v;
 }
 
+function normalizarChaveEmailAdmin(email) {
+  // Realtime Database não aceita chaves com . # $ [ ] / — mesma conversão
+  // usada pelo app.js no nó /usuarios.
+  return String(email || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+}
+
 async function eEmailAdmin(email) {
   const e = normalizarEmailAdmin(email);
   if (!e) return false;
   if (ADM_EMAILS_FALLBACK.includes(e)) return true;
   try {
     await window.ccoFirebase.ready;
-    const snap = await window.ccoFirebase.db.ref('usuarios').orderByChild('email').equalTo(e).once('value');
-    const reg = Object.values(snap.val() || {})[0];
+    const snap = await window.ccoFirebase.db.ref('usuarios/' + normalizarChaveEmailAdmin(e)).once('value');
+    const reg = snap.val();
     return !!(reg && reg.perfil === 'admin' && reg.ativo !== false);
   } catch (err) {
     console.warn('[CCO ADM] Não foi possível validar e-mail admin no Firebase:', err);

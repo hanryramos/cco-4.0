@@ -744,6 +744,36 @@
     .btn-game-primary:hover { background: #0369a1; }
     .btn-game-primary:disabled { opacity: 0.6; cursor: not-allowed; }
 
+    .game-login-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 16px 0 12px;
+      color: #51637b;
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+    }
+    .game-login-divider::before,
+    .game-login-divider::after { content: ""; flex: 1; height: 1px; background: #1b2a3d; }
+
+    .btn-game-admin {
+      width: 100%;
+      background: transparent;
+      border: 1px dashed rgba(56, 189, 248, .45);
+      color: #7dd3fc;
+      padding: 11px;
+      border-radius: 6px;
+      font-weight: 800;
+      font-size: 12px;
+      letter-spacing: .4px;
+      cursor: pointer;
+      transition: all .2s ease;
+    }
+    .btn-game-admin:hover { background: rgba(56, 189, 248, .08); border-style: solid; border-color: #38bdf8; color: #e0f2fe; transform: translateY(-1px); }
+    .btn-game-admin:active { transform: translateY(0) scale(.985); }
+
     /* Background temático da tela de login */
     .game-login-bg {
       position: absolute;

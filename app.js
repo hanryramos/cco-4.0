@@ -1928,37 +1928,34 @@
       }
     } catch (e) { /* localStorage indisponível */ }
 
+    if (ehAdmin) {
+      // Administradores acessam a Central ADM pelo botão "Entrar como Administrador",
+      // sem redirecionamento automático a partir do login operacional (evita duplo login).
+      if (btnLogar) btnLogar.disabled = false;
+      if (btnLabel) btnLabel.textContent = 'ACESSAR SIMULADOR';
+      if (btnSpinner) btnSpinner.hidden = true;
+      mostrarErroLogin("E-mail de administrador reconhecido. Use o botão 'Entrar como Administrador' abaixo para acessar a Central ADM.", emailInput);
+      return;
+    }
+
+    gameState.isAdmin = false;
     const modalLogin = document.getElementById('game-login-modal');
     if (modalLogin) modalLogin.style.display = 'none';
 
-    if (ehAdmin) {
-      gameState.isAdmin = true;
+    const adminPanel = document.getElementById('admin-control-panel');
+    if (adminPanel) adminPanel.style.display = 'none';
 
-      // Autoriza o acesso direto à Central Administrativa
-      // nesta aba/sessão (a página ADM valida esta marca).
-      try { sessionStorage.setItem('cco40_admin_allowed', '1'); } catch (e) {}
-
-      // O login de administrador já representa a entrada na Central ADM.
-      // Não passa mais pela tela do CCO nem exige um segundo clique.
-      window.location.href = "admin_game_v2.html";
-      return;
-    } else {
-      gameState.isAdmin = false;
-      const adminPanel = document.getElementById('admin-control-panel');
-      if (adminPanel) adminPanel.style.display = 'none';
-
-      const userTag = document.getElementById('user-operator-tag');
-      if (userTag) {
-        const nomeExibido = gameState.operadorNome || userEmail;
-        userTag.innerText = `PLATAFORMA INTEGRADA CCO 4.0 | OPERADOR: ${nomeExibido} (${userEmail})`;
-      }
-
-      // Conecta este operador ao Firebase para sincronizar presença e pontos.
-      inicializarSincronizacaoFirebase();
-
-      // Primeiro acesso: apresenta o guia rápido do CCO.
-      iniciarTutorialSeNecessario();
+    const userTag = document.getElementById('user-operator-tag');
+    if (userTag) {
+      const nomeExibido = gameState.operadorNome || userEmail;
+      userTag.innerText = `PLATAFORMA INTEGRADA CCO 4.0 | OPERADOR: ${nomeExibido} (${userEmail})`;
     }
+
+    // Conecta este operador ao Firebase para sincronizar presença e pontos.
+    inicializarSincronizacaoFirebase();
+
+    // Primeiro acesso: apresenta o guia rápido do CCO.
+    iniciarTutorialSeNecessario();
 
     configurarPainelAdmin();
   }
