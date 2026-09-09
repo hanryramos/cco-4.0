@@ -142,6 +142,16 @@ function renderRanking() {
     }).join('');
 
   body.innerHTML = rows || '<tr><td colspan="7" class="empty">Nenhum operador registrado.</td></tr>';
+
+  // Stagger sutil apenas quando o conteúdo da tabela realmente muda.
+  const rankKey = [...adminState.operators.values()].map(op => `${op.key}:${op.points}:${op.status}`).join('|');
+  if (body._rankKey !== rankKey) {
+    body._rankKey = rankKey;
+    body.classList.remove('stagger-in');
+    void body.offsetWidth;
+    body.classList.add('stagger-in');
+  }
+
   body.querySelectorAll('tr[data-key]').forEach(row => {
     const open = () => showOperator(row.dataset.key);
     row.addEventListener('click', e => { if (!e.target.closest('.detail-operator-btn')) open(); });

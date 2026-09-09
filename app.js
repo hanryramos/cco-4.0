@@ -490,7 +490,32 @@
 
     updateUIForCurrentTab();
     atualizarBloqueioVisual();
+    setTimeout(() => animarContadoresNoModulo(activeModule), 260);
     atualizarTabSlider();
+  }
+
+  function animarContadoresNoModulo(moduloEl) {
+    if (!moduloEl) return;
+    moduloEl.querySelectorAll('.metric-value, .metric-val').forEach(el => {
+      const alvoOriginal = (el.innerText || '').trim();
+      const alvo = alvoOriginal.replace(/([+-])\s+/, '$1');
+      const m = /^(-?\d+(?:\.\d+)?)([\s\S]*)$/.exec(alvo);
+      if (!m) return;
+      const fim = parseFloat(m[1]);
+      if (isNaN(fim) || fim === 0) return;
+      const sufixo = m[2];
+      const duracao = 650;
+      const inicio = performance.now();
+      const animar = agora => {
+        const p = Math.min((agora - inicio) / duracao, 1);
+        const eased = 1 - Math.pow(1 - p, 3);
+        const atual = fim * eased;
+        el.innerText = (fim % 1 === 0 ? String(Math.round(atual)) : atual.toFixed(1)) + sufixo;
+        if (p < 1) requestAnimationFrame(animar);
+        else el.innerText = alvoOriginal;
+      };
+      requestAnimationFrame(animar);
+    });
   }
 
   function atualizarTabSlider() {
@@ -1021,6 +1046,8 @@
 
     const badgeCCO = document.getElementById('cco-badge');
     const sidebarBadge = document.getElementById('sidebar-count');
+    const tabCco = document.getElementById('tab-cco-center');
+    if (tabCco) tabCco.classList.toggle('cco-alert', notificationCount > 0);
     if (badgeCCO) {
       badgeCCO.innerText = notificationCount;
       badgeCCO.style.display = notificationCount ? 'inline-block' : 'none';
@@ -1032,6 +1059,15 @@
     }
     ultimoBadgeCount = notificationCount;
     if (sidebarBadge) sidebarBadge.innerText = `${notificationCount} Ativos`;
+
+    // Stagger sutil apenas quando o conteúdo da lista realmente muda.
+    const listaKey = ccoEvents.filter(e => e.status !== 'resolvido').map(e => e.id + ':' + e.status).join('|');
+    if (container._staggerKey !== listaKey) {
+      container._staggerKey = listaKey;
+      container.classList.remove('stagger-in');
+      void container.offsetWidth;
+      container.classList.add('stagger-in');
+    }
 
     if (!ccoEvents.length) {
       container.innerHTML = `<div id="empty-notif-msg" class="empty-notif"><div class="empty-notif-icon">✓</div><strong>Nenhuma ocorrência pendente</strong><span>As simulações dos módulos 1 a 4 aparecerão aqui quando gerarem um evento.</span></div>`;
@@ -1199,6 +1235,11 @@
     const content = document.getElementById('cco-detail-content');
     const status = document.getElementById('cco-detail-status');
     if (!content || !status) return;
+
+    // Fade sutil ao atualizar o painel de detalhe.
+    content.classList.remove('fade-in');
+    void content.offsetWidth;
+    content.classList.add('fade-in');
 
     if (!evento) {
       status.className = 'event-status status-pendente';
@@ -1394,7 +1435,14 @@
     const bannerText = document.getElementById('banner-text');
     if (bannerText) {
       bannerText.innerText = texto;
-      bannerText.style.color = cor || "#38bdf8";
+      const c = cor || "#38bdf8";
+      bannerText.style.color = c;
+      const banner = bannerText.closest('.alert-banner');
+      if (banner) {
+        banner.style.borderLeftColor = c;
+        const glow = /^#[0-9a-f]{6}$/i.test(c) ? c + '26' : 'rgba(56,189,248,.15)';
+        banner.style.boxShadow = `0 0 14px ${glow}`;
+      }
     }
   }
 
