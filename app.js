@@ -837,7 +837,7 @@
       wheels.forEach(w => w.style.animationPlayState = 'paused');
       tracks.forEach(t => t.style.animationPlayState = 'paused');
       if (vibrationWrapper) {
-        esconderExplosaoTrem();
+        redefinirEstadoTrem();
         vibrationWrapper.classList.remove('shaking', 'derailed');
         void vibrationWrapper.offsetWidth;
         vibrationWrapper.classList.add('derailed');
@@ -868,7 +868,7 @@
       }, 3800);
       atualizarBanner(ocorrencia.banner, critical ? '#ef4444' : '#f59e0b');
     } else {
-      esconderExplosaoTrem();
+      redefinirEstadoTrem();
       if (sparks) sparks.style.display = 'none';
       if (vibrationWrapper) { vibrationWrapper.classList.remove('shaking', 'derailed'); vibrationWrapper.style.animationPlayState = 'running'; }
       if (bogieStructure) bogieStructure.classList.remove('bogie-critical');
@@ -898,7 +898,7 @@
 
     if (sparks) sparks.style.display = 'none';
     if (vibrationWrapper) {
-      esconderExplosaoTrem();
+      redefinirEstadoTrem();
       vibrationWrapper.classList.remove('shaking', 'derailed');
       vibrationWrapper.style.animationPlayState = 'paused';
     }
@@ -962,7 +962,7 @@
   }
 
   function retomarAnimacaoTrem() {
-    esconderExplosaoTrem();
+    redefinirEstadoTrem();
     const trainGroup = document.getElementById('train-2d-group');
     const vibrationWrapper = document.getElementById('train-vibration-wrapper');
     const wheels = document.querySelectorAll('.wheel-rotate');
@@ -974,28 +974,24 @@
     tracks.forEach(track => track.style.animationPlayState = 'running');
   }
 
-  /* --- EXPLOSÃO DA LOCOMOTIVA (fim da animação de descarrilamento) --- */
+  /* --- DESTROÇO DO TREM (fim da animação de descarrilamento) --- */
   function aoTerminarDescarrilamento(event) {
     if (event && event.animationName === 'tombamentoTrem') {
-      explodirTrem();
+      finalizarDescarrilamento();
     }
   }
 
-  function explodirTrem() {
+  function finalizarDescarrilamento() {
     const loco = document.getElementById('vale-locomotive');
-    const explosao = document.getElementById('train-explosion');
-    // Mantém o tombamento: o vagão fica tombado na via como destroço, com fogo por cima.
+    // Mantém o tombamento: o vagão fica tombado na via como destroço.
     if (loco) loco.classList.add('train-wrecked');
-    if (explosao) explosao.style.display = 'block';
-    atualizarBanner('💥 Descarrilamento crítico — a locomotiva explodiu! Composição fora de operação.', '#ef4444');
+    atualizarBanner('💥 Descarrilamento crítico — a locomotiva tombou e saiu de operação!', '#ef4444');
   }
 
-  function esconderExplosaoTrem() {
+  function redefinirEstadoTrem() {
     if (alertaDescarrilamentoTimeout) { clearTimeout(alertaDescarrilamentoTimeout); alertaDescarrilamentoTimeout = null; }
     const loco = document.getElementById('vale-locomotive');
-    const explosao = document.getElementById('train-explosion');
     if (loco) loco.classList.remove('train-wrecked');
-    if (explosao) explosao.style.display = 'none';
   }
 
   gameChannel.onmessage = (event) => {

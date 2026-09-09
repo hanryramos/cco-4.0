@@ -7,7 +7,7 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
-  <link rel="stylesheet" href="style.css?v=13">
+  <link rel="stylesheet" href="style.css?v=14">
   <link rel="stylesheet" href="mobile.css?v=1">
 </head>
 <body>
@@ -396,14 +396,6 @@
     <div id="mod-descarrilamento" class="module">
       <div class="derail-stage">
         <svg viewBox="0 0 800 220" preserveAspectRatio="xMidYMid meet">
-          <defs>
-            <radialGradient id="explo-grad" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stop-color="#ffffff"/>
-              <stop offset="35%" stop-color="#ffe082"/>
-              <stop offset="65%" stop-color="#ff8a3c"/>
-              <stop offset="100%" stop-color="rgba(255,80,0,0)"/>
-            </radialGradient>
-          </defs>
           <line x1="0" y1="180" x2="800" y2="180" stroke="#334155" stroke-width="6"/>
           <line x1="0" y1="183" x2="800" y2="183" stroke="#00f2fe" stroke-width="2" stroke-dasharray="10 5" class="track-active"/>
 
@@ -444,23 +436,6 @@
                   <path d="M150 160 L132 180 M150 160 L126 169 M150 160 L138 188" stroke="#ef4444" stroke-width="3"/>
                   <path d="M290 160 L272 181 M290 160 L266 170" stroke="#f59e0b" stroke-width="3"/>
                 </g>
-              </g>
-            </g>
-            <g id="train-explosion" style="display: none;">
-              <circle cx="430" cy="105" r="30" fill="#fff" class="explo-flash"/>
-              <circle cx="430" cy="105" r="70" fill="url(#explo-grad)" class="explo-core"/>
-              <circle cx="430" cy="105" r="45" fill="none" stroke="#ffd54f" stroke-width="7" class="explo-ring"/>
-              <circle cx="430" cy="105" r="45" fill="none" stroke="#ff7043" stroke-width="5" class="explo-ring two"/>
-              <g class="explo-debris">
-                <path d="M430 105 L525 62" stroke="#ffd54f" stroke-width="5" stroke-linecap="round"/>
-                <path d="M430 105 L335 58" stroke="#ff7043" stroke-width="4" stroke-linecap="round"/>
-                <path d="M430 105 L525 158" stroke="#ffb74d" stroke-width="4" stroke-linecap="round"/>
-                <path d="M430 105 L328 162" stroke="#ffca28" stroke-width="4" stroke-linecap="round"/>
-              </g>
-              <g class="explo-smoke">
-                <circle cx="400" cy="66" r="18" fill="#475569" opacity=".8"/>
-                <circle cx="458" cy="52" r="22" fill="#64748b" opacity=".75"/>
-                <circle cx="422" cy="32" r="16" fill="#94a3b8" opacity=".55"/>
               </g>
             </g>
           </g>
@@ -595,6 +570,6 @@
 <script src="firebase-config.js?v=6"></script>
 
 <!-- LÓGICA JAVASCRIPT DA APLICAÇÃO -->
-<script src="app.js?v=12"></script>
+<script src="app.js?v=13"></script>
 </body>
 </html>
