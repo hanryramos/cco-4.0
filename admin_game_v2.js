@@ -791,7 +791,18 @@ async function novoGameADM() {
       resetEm: firebase.database.ServerValue.TIMESTAMP
     });
     // Remove os operadores persistidos; cada um se registra novamente ao sincronizar.
-    await window.ccoFirebase.db.ref('operadores').remove();
+    // As regras do Firebase só autorizam escrita em /operadores/{chave} (não no nó pai),
+    // então apagamos cada chave individualmente em um único update.
+    try {
+      const opSnap = await window.ccoFirebase.db.ref('operadores').once('value');
+      const updates = {};
+      opSnap.forEach(reg => { updates[reg.key] = null; });
+      if (Object.keys(updates).length) {
+        await window.ccoFirebase.db.ref('operadores').update(updates);
+      }
+    } catch (err) {
+      console.warn('[CCO ADM] Não foi possível remover a lista de operadores em lote:', err);
+    }
 
     currentSessionId = null;
     adminState.phase = 'training';
@@ -814,7 +825,8 @@ async function novoGameADM() {
     alert('NOVO GAME preparado! Todas as informações foram limpas. Os operadores devem refazer o login para reiniciar a partida.');
   } catch (e) {
     console.error('[CCO ADM] Erro ao zerar o Game:', e);
-    alert('Não foi possível zerar o Game. Verifique o Firebase.');
+    const erroMsg = (e && e.message) ? e.message : '';
+    alert('Não foi possível zerar o Game. Verifique o Firebase.' + (erroMsg ? '\n\nErro técnico: ' + erroMsg : ''));
   }
 }
 
