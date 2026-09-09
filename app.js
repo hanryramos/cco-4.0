@@ -1652,13 +1652,13 @@
       icon: '👋', title: 'Bem-vindo ao CCO 4.0',
       text: 'Este ambiente simula a rotina de um operador do Centro de Controle Operacional. Aqui você vai analisar situações, tomar decisões e acompanhar seu desempenho.',
       target: null,
-      extra: '<div class="cco-tutorial-tip"><strong>Objetivo:</strong> operar com segurança, atenção e agilidade. Pontuação é consequência de boas decisões — não substitui a segurança.</div>'
+      extra: '<div class="cco-tutorial-tip"><strong>Objetivo:</strong> operar com segurança, atenção e agilidade. Pontuação é consequência de boas decisões — não substitui a segurança.</div><div class="cco-tutorial-tip"><strong>Game:</strong> aguarde o Administrador iniciar o GAME para receber os cards de incidentes. Enquanto isso, aproveite para testar as simulações.</div>'
     },
     {
       icon: '📚', title: 'Explore as simulações',
       text: 'As quatro primeiras abas são módulos de treinamento. Cada uma apresenta situações diferentes para você praticar antes ou durante o Game.',
       target: '.nav-tabs',
-      extra: '<div class="cco-tutorial-tip"><strong>1. Malha & RAMP</strong> — fluxo e capacidade operacional.</div><div class="cco-tutorial-tip"><strong>2. IA Preditiva</strong> — leitura de sinais e anomalias.</div><div class="cco-tutorial-tip"><strong>3. Eco-Driving</strong> — eficiência e condução.</div><div class="cco-tutorial-tip"><strong>4. Prevenção Descarrilamento</strong> — segurança e integridade.</div><div class="cco-tutorial-tip"><strong>Game:</strong> aguarde o Administrador iniciar o GAME para receber os cards de incidentes. Enquanto isso, aproveite para testar as simulações.</div>'
+      extra: '<div class="cco-tutorial-tip"><strong>1. Malha & RAMP</strong> — fluxo e capacidade operacional.</div><div class="cco-tutorial-tip"><strong>2. IA Preditiva</strong> — leitura de sinais e anomalias.</div><div class="cco-tutorial-tip"><strong>3. Eco-Driving</strong> — eficiência e condução.</div><div class="cco-tutorial-tip"><strong>4. Prevenção Descarrilamento</strong> — segurança e integridade.</div>'
     },
     {
       icon: '🚨', title: 'Analise cada ocorrência',
