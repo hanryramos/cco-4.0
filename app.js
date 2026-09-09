@@ -426,6 +426,7 @@
     atualizarStatusCentralCCO();
 
     inicializarTelaLogin();
+    habilitarTiltCards();
 
     // Restaura a preferência de som de alerta salva no dispositivo.
     try { ccoSomAtivo = localStorage.getItem('cco40_som') !== '0'; } catch (e) {}
@@ -671,11 +672,14 @@
       if (rampTrack) rampTrack.setAttribute('class', ocorrencia.visual === 'ramp' ? 'track-animated track-warning' : 'track-animated track-active');
       if (rampZone) rampZone.style.display = ocorrencia.visual === 'ramp' ? 'block' : 'none';
 
-      // Tremor rápido de perturbação operacional no congestionamento.
+      // Tremor rápido + semáforos piscando + vagões acumulados no congestionamento.
       if (modMalha && ocorrencia.visual === 'ramp') {
         modMalha.classList.remove('sim-shake');
         void modMalha.offsetWidth;
         modMalha.classList.add('sim-shake');
+        modMalha.classList.add('ramp-congested');
+        clearTimeout(modMalha._congestedT);
+        modMalha._congestedT = setTimeout(() => modMalha.classList.remove('ramp-congested'), 8000);
       }
 
       dispararAlerta(ocorrencia.titulo, ocorrencia.mensagem, ocorrencia);
@@ -683,6 +687,10 @@
     } else {
       if (rampTrack) rampTrack.setAttribute('class', 'track-active');
       if (rampZone) rampZone.style.display = 'none';
+      if (modMalha) {
+        modMalha.classList.remove('ramp-congested', 'sim-shake');
+        if (modMalha._congestedT) { clearTimeout(modMalha._congestedT); modMalha._congestedT = null; }
+      }
       atualizarBanner("Análise Dinâmica de Via: Pátio RAMP operando normalmente.", "#10b981");
     }
   }
@@ -781,7 +789,7 @@
         iaDataset.borderColor = '#ef4444';
         iaDataset.backgroundColor = 'rgba(239,68,68,.15)';
         iaDataset.data = atraso ? [14.2, 15.0, 15.8, 16.2, 15.6, 16.0] : [15.8, 16.4, 17.1, 16.8, 17.5, 17.0];
-        ecoChartInstance.update();
+        pulsarUltimoPonto(ecoChartInstance, '#ef4444', 1);
       }
 
       dispararAlerta(ocorrencia.titulo, ocorrencia.mensagem, ocorrencia);
@@ -800,7 +808,7 @@
         iaDataset.borderColor = '#10b981';
         iaDataset.backgroundColor = 'rgba(16,185,129,.1)';
         iaDataset.data = [14.2, 14.0, 14.5, 14.1, 14.3, 14.0];
-        ecoChartInstance.update();
+        pulsarUltimoPonto(ecoChartInstance, '#10b981', 1);
       }
       atualizarBanner("Eco-Driving Ativado: Aceleração e frenagem otimizadas para a rampa.", "#10b981");
     }
@@ -859,7 +867,7 @@
           : [0.05, 0.2, 0.55, 0.75, 0.8, 0.7, 0.9, 0.82, 0.95, 0.9];
         vibrationChart.data.datasets[0].borderColor = critical ? '#ef4444' : '#f59e0b';
         vibrationChart.data.datasets[0].backgroundColor = critical ? 'rgba(239,68,68,.2)' : 'rgba(245,158,11,.15)';
-        vibrationChart.update();
+        pulsarUltimoPonto(vibrationChart, critical ? '#ef4444' : '#f59e0b', 0);
       }
 
       if (alertaDescarrilamentoTimeout) clearTimeout(alertaDescarrilamentoTimeout);
@@ -882,7 +890,7 @@
         vibrationChart.data.datasets[0].data = [0.02,0.01,0.03,0.02,0.02,0.01,0.03,0.02,0.02,0.01];
         vibrationChart.data.datasets[0].borderColor = '#10b981';
         vibrationChart.data.datasets[0].backgroundColor = 'rgba(16,185,129,.1)';
-        vibrationChart.update();
+        pulsarUltimoPonto(vibrationChart, '#10b981', 0);
       }
       retomarAnimacaoTrem();
       atualizarBanner("Prevenção de Descarrilamento: Leitura de estabilidade do truque normal.", "#10b981");
@@ -1638,6 +1646,44 @@
         },
         plugins: { legend: { display: false } }
       }
+    });
+  }
+
+  /* --- STREAMING AO VIVO DOS GRÁFICOS (última amostra pulsa) --- */
+  function pulsarUltimoPonto(chart, cor, idx = 0) {
+    if (!chart || !chart.data || !chart.data.datasets) return;
+    const ds = chart.data.datasets[idx];
+    const n = ds && ds.data ? ds.data.length : 0;
+    if (!ds || !n) return;
+    const base = chart._pulseBase !== undefined ? chart._pulseBase : (typeof ds.pointRadius === 'number' ? ds.pointRadius : 3);
+    chart._pulseBase = base;
+    ds.pointRadius = Array(n).fill(base);
+    ds.pointBackgroundColor = Array(n).fill(ds.borderColor || '#38bdf8');
+    ds.pointRadius[n - 1] = base + 4;
+    ds.pointBackgroundColor[n - 1] = cor || '#38bdf8';
+    chart.update();
+    setTimeout(() => {
+      if (!chart || !chart.data || !chart.data.datasets) return;
+      const t = chart.data.datasets[idx];
+      if (t && t.data) { t.pointRadius = Array(t.data.length).fill(base); chart.update(); }
+    }, 950);
+  }
+
+  /* --- TILT 3D DOS CARDS (acompanha o mouse) --- */
+  function habilitarTiltCards() {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    document.querySelectorAll('.cards-grid').forEach(grid => grid.classList.add('tilt-grid'));
+    document.addEventListener('mousemove', (e) => {
+      document.querySelectorAll('.tilt-grid .card[data-tilt]').forEach(c => {
+        if (!c.contains(e.target)) { c.removeAttribute('data-tilt'); c.style.transform = ''; }
+      });
+      const card = e.target.closest ? e.target.closest('.tilt-grid .card') : null;
+      if (!card) return;
+      const r = card.getBoundingClientRect();
+      const dx = (e.clientX - r.left) / r.width - 0.5;
+      const dy = (e.clientY - r.top) / r.height - 0.5;
+      card.style.transform = `perspective(900px) rotateX(${(-dy * 7).toFixed(2)}deg) rotateY(${(dx * 9).toFixed(2)}deg) translateY(-2px)`;
+      card.setAttribute('data-tilt', '1');
     });
   }
 
@@ -3263,6 +3309,18 @@ function obterOcorrenciaDesafio(d, indice) {
   return banco.find(x => Number(x.id) === id) || banco[0] || null;
 }
 
+function atualizarBarrasDesafio() {
+  const ler = (id) => Math.max(0, Number(((document.getElementById(id) || {}).textContent || '').replace(/[^\d]/g, '') || 0));
+  const me = ler('challenge-me-score');
+  const op = ler('challenge-op-score');
+  const total = me + op;
+  const pctMe = total ? Math.round((me / total) * 100) : 50;
+  const barMe = document.getElementById('challenge-me-bar');
+  const barOp = document.getElementById('challenge-op-bar');
+  if (barMe) barMe.style.width = pctMe + '%';
+  if (barOp) barOp.style.width = (100 - pctMe) + '%';
+}
+
 function renderizarDesafioAtivo(d) {
   const souA = d.desafianteUid === firebaseOperatorKey;
   const meuUid = firebaseOperatorKey;
@@ -3276,6 +3334,7 @@ function renderizarDesafioAtivo(d) {
   document.getElementById('challenge-op-name').textContent = souA ? d.desafiadoNome : d.desafianteNome;
   document.getElementById('challenge-me-score').textContent = `${Math.max(0, Number(meu.pontos||0))} pts`;
   document.getElementById('challenge-op-score').textContent = `${Math.max(0, Number(outro.pontos||0))} pts`;
+  atualizarBarrasDesafio();
 
   const indice = Math.min((meu.respostas || []).length, DESAFIO_RODADAS-1);
   // O feedback pertence à ocorrência que acabou de ser respondida.

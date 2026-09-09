@@ -2161,3 +2161,89 @@ html,body { max-width:100%; overflow-x:hidden; }
 .train-wrecked {
   filter: grayscale(0.8) brightness(0.5);
 }
+
+/* ==========================================================================
+   POLIMENTO VISUAL — logo vivo, congestionamento da Malha, tilt 3D e placar VS
+   ========================================================================== */
+
+/* 1) Logo vivo: gradiente animado no "4.0" + ponto de pulso orbitante. */
+.cco-brand { position: relative; }
+.cco-brand em {
+  background: linear-gradient(90deg, #38bdf8, #22d3ee, #818cf8, #38bdf8);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  text-shadow: none;
+  animation: brandFlow 5s linear infinite;
+}
+@keyframes brandFlow {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
+}
+.cco-brand::after {
+  content: "";
+  position: absolute;
+  right: -4px;
+  top: -4px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #22d3ee;
+  box-shadow: 0 0 0 0 rgba(34, 211, 238, .7);
+  animation: brandPing 1.6s ease-out infinite;
+}
+@keyframes brandPing {
+  0%   { box-shadow: 0 0 0 0 rgba(34, 211, 238, .7); }
+  70%  { box-shadow: 0 0 0 7px rgba(34, 211, 238, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0); }
+}
+
+/* 2) Congestionamento na Malha: semáforos piscando + vagões acumulados na fila. */
+.signal-dot { display: none; fill: #ef4444; filter: drop-shadow(0 0 4px #ef4444); }
+.queued-train { display: none; }
+#mod-malha.ramp-congested .signal-dot { display: block; animation: sinalBlink .55s steps(1, end) infinite; }
+#mod-malha.ramp-congested .signal-dot:nth-child(2) { animation-delay: .18s; }
+#mod-malha.ramp-congested .signal-dot:nth-child(3) { animation-delay: .36s; }
+#mod-malha.ramp-congested .queued-train { display: block; animation: trainJitter .25s ease-in-out infinite alternate; }
+#mod-malha.ramp-congested { animation: malhaShake .45s ease infinite; }
+@keyframes sinalBlink { 0%, 60% { opacity: 1; } 61%, 100% { opacity: .12; } }
+@keyframes trainJitter { from { transform: translateY(0); } to { transform: translateY(-1.5px); } }
+
+/* 3) Tilt 3D dos cards (perspective conforme o mouse). */
+.tilt-grid { perspective: 1000px; }
+.tilt-grid .card {
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform .18s ease, box-shadow .2s ease, border-color .2s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tilt-grid .card { transform: none !important; transition: none; }
+}
+
+/* 4) Placar lado a lado do desafio: barras de porcentagem + VS pulsando. */
+.challenge-hitbar {
+  height: 7px;
+  border-radius: 99px;
+  background: #0c1a26;
+  overflow: hidden;
+  margin-top: 8px;
+}
+.challenge-hitbar-fill {
+  height: 100%;
+  width: 50%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #38bdf8, #22d3ee);
+  transition: width .8s cubic-bezier(.22, 1, .36, 1);
+}
+.challenge-match-head > div:last-child .challenge-hitbar-fill { background: linear-gradient(90deg, #f59e0b, #fb7185); }
+.challenge-match-head .challenge-vs {
+  color: #38bdf8;
+  text-shadow: 0 0 12px rgba(56, 189, 248, .55);
+  animation: vsPulse 1.6s ease-in-out infinite;
+}
+@keyframes vsPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(1.18); opacity: .72; }
+}
