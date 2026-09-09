@@ -1211,8 +1211,12 @@
         gameState.pontuacao = Math.max(0, gameState.pontuacao - 50);
         atualizarPontuacaoUI();
         publicarEventoGameFirebase({ type: 'CCO_TIMEOUT', resultado: 'timeout-assumir', correct: false, titulo: evento.titulo, eventoId: evento.id, points: -50, operador: gameState.operador });
-        aplicarBloqueioOperador('Tempo esgotado para assumir a ocorrência.', evento.origemTab || 'mod-malha');
-        atualizarBanner('Tempo esgotado para assumir a ocorrência. -50 pontos e bloqueio de 60 segundos.', '#ef4444');
+        const alvoAssumir = evento.origemTab || 'mod-malha';
+        const jaBloqueadoAssumir = gameState.bloqueiosPorAba[alvoAssumir] && gameState.bloqueiosPorAba[alvoAssumir].deadline > Date.now();
+        aplicarBloqueioOperador('Tempo esgotado para assumir a ocorrência.', alvoAssumir);
+        atualizarBanner(jaBloqueadoAssumir
+          ? 'Tempo esgotado para assumir a ocorrência. -50 pontos (operador já bloqueado — sem novo bloqueio).'
+          : 'Tempo esgotado para assumir a ocorrência. -50 pontos e bloqueio de 60 segundos.', '#ef4444');
         selectedCcoEventId = evento.id;
         houveMudancaDeStatus = true;
       }
@@ -2461,6 +2465,16 @@
   function aplicarBloqueioOperador(motivo, tabId = currentTab) {
     const alvo = tabId || currentTab;
     const agora = Date.now();
+
+    // Se o operador JÁ está bloqueado nesta aba, não empilha um novo bloqueio.
+    // Uma ocorrência que expira durante o bloqueio não pode gerar OUTRO bloqueio,
+    // senão vira um loop infinito de bloqueios a cada nova ocorrência que surgir.
+    const bloqueioAtivo = gameState.bloqueiosPorAba[alvo] && gameState.bloqueiosPorAba[alvo].deadline > agora;
+    if (bloqueioAtivo) {
+      console.info('[CCO 4.0] Operador já bloqueado na aba "' + alvo + '" — novo bloqueio ignorado.');
+      return;
+    }
+
     gameState.bloqueiosPorAba[alvo] = {
       deadline: agora + 60000,
       motivo: motivo || 'Decisão operacional inadequada.'
