@@ -88,6 +88,8 @@ async function eEmailAdmin(email) {
 function bloquearPainelADM() {
   const gate = document.getElementById('admin-gate');
   if (gate) gate.style.display = 'flex';
+  if (gate && gate.dataset.gateBound === '1') return;
+  if (gate) gate.dataset.gateBound = '1';
   const err = document.getElementById('admin-gate-error');
   const input = document.getElementById('admin-gate-email');
   const btn = document.getElementById('admin-gate-enter');
@@ -852,33 +854,65 @@ async function carregarResultadoAtualPersistido() {
   } catch (e) { console.warn('[CCO ADM] Resultado persistido indisponivel:', e); }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  atualizarControlesRegras();
+function exibirErroADM(mensagem) {
+  const errBox = document.getElementById('admin-gate-error');
+  if (errBox) { errBox.textContent = mensagem; errBox.hidden = false; }
+}
 
-  // Gate de acesso: passa direto se o operador logado como admin redirecionou para cá
-  // (marca gravada no sessionStorage pelo app.js); caso contrário exige e-mail admin.
-  let sessaoAdminOk = false;
-  try { sessaoAdminOk = sessionStorage.getItem('cco40_admin_allowed') === '1'; } catch (e) {}
-  if (!sessaoAdminOk) bloquearPainelADM();
-
-  const newGameBtn = $('new-game');
-  if (newGameBtn) newGameBtn.onclick = () => novoGameADM();
-  const clearBtn = $('clear-match');
-  if (clearBtn) clearBtn.onclick = async () => {
-    if (!confirm('Limpar participantes e pontuacoes para preparar uma nova partida? O historico continuara salvo no Firebase.')) return;
-    try {
-      await window.ccoFirebase.ready;
-      const agora = Date.now();
-      await window.ccoFirebase.db.ref('game/clearRequestedAt').set(firebase.database.ServerValue.TIMESTAMP);
-      await window.ccoFirebase.db.ref('game/desafiosLimparEm').set(agora);
-      adminState.challengeClearAt = agora;
-      adminState.challenges.clear();
-      adminState.selectedChallengeId = null;
-      adminState.finalResults=[]; adminState.operators.clear(); adminState.points=adminState.events=adminState.correct=adminState.wrong=adminState.timeouts=adminState.blocks=0; render();
-      alert('Limpeza enviada. Participantes, pontuações e desafios exibidos na Central foram zerados para a nova partida. O histórico antigo continua salvo no Firebase.');
-    } catch(e){console.error('[CCO ADM] Erro ao solicitar limpeza:',e);alert('Nao foi possivel preparar a nova partida. Verifique o Firebase.');}
-  };
-  conectarFirebaseADM();
-  window.ccoAdminFirebaseReady=window.ccoFirebase?.ready||null;
-  window.ccoFirebase?.ready?.then(()=>{ouvirEstadoGameADM();ouvirDesafiosADM();}).catch(e=>console.error('[CCO ADM] Firebase indisponível:',e));
+window.addEventListener('error', ev => {
+  exibirErroADM('Erro inesperado: ' + (ev && ev.message ? ev.message : 'desconhecido'));
 });
+
+function iniciarPlataformaADM() {
+  const app = document.getElementById('admin-app');
+  if (app && app.dataset.iniciado === '1') return;
+  if (app) app.dataset.iniciado = '1';
+  try {
+    // Gate de acesso: se a sessão já foi liberada, mostra direto o painel;
+    // caso contrário exige e-mail admin.
+    let sessaoAdminOk = false;
+    try { sessaoAdminOk = sessionStorage.getItem('cco40_admin_allowed') === '1'; } catch (e) {}
+    if (sessaoAdminOk) {
+      liberarPainelADM();
+    } else {
+      bloquearPainelADM();
+    }
+
+    atualizarControlesRegras();
+
+    const newGameBtn = $('new-game');
+    if (newGameBtn) newGameBtn.onclick = () => novoGameADM();
+    const clearBtn = $('clear-match');
+    if (clearBtn) clearBtn.onclick = async () => {
+      if (!confirm('Limpar participantes e pontuacoes para preparar uma nova partida? O historico continuara salvo no Firebase.')) return;
+      try {
+        await window.ccoFirebase.ready;
+        const agora = Date.now();
+        await window.ccoFirebase.db.ref('game/clearRequestedAt').set(firebase.database.ServerValue.TIMESTAMP);
+        await window.ccoFirebase.db.ref('game/desafiosLimparEm').set(agora);
+        adminState.challengeClearAt = agora;
+        adminState.challenges.clear();
+        adminState.selectedChallengeId = null;
+        adminState.finalResults=[]; adminState.operators.clear(); adminState.points=adminState.events=adminState.correct=adminState.wrong=adminState.timeouts=adminState.blocks=0; render();
+        alert('Limpeza enviada. Participantes, pontuações e desafios exibidos na Central foram zerados para a nova partida. O histórico antigo continua salvo no Firebase.');
+      } catch(e){console.error('[CCO ADM] Erro ao solicitar limpeza:',e);alert('Nao foi possivel preparar a nova partida. Verifique o Firebase.');}
+    };
+    conectarFirebaseADM();
+    window.ccoAdminFirebaseReady=window.ccoFirebase?.ready||null;
+    window.ccoFirebase?.ready?.then(()=>{ouvirEstadoGameADM();ouvirDesafiosADM();}).catch(e=>console.error('[CCO ADM] Firebase indisponível:',e));
+  } catch (e) {
+    console.error('[CCO ADM] Falha na inicialização:', e);
+    exibirErroADM('Erro de inicialização: ' + (e && e.message ? e.message : String(e)));
+  }
+}
+
+// O script é carregado no fim do <body>: liga o botão do gate imediatamente,
+// sem depender do DOMContentLoaded, garantindo que o login reaja ao clique
+// mesmo se algo falhar durante a inicialização da Central.
+bloquearPainelADM();
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', iniciarPlataformaADM, { once: true });
+} else {
+  iniciarPlataformaADM();
+}
