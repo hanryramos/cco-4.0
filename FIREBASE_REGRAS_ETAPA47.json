@@ -1,0 +1,14 @@
+{
+  "rules": {
+    "operadores": {
+      ".read": "auth != null",
+      "$operadorKey": {
+        ".write": "auth != null"
+      }
+    },
+    "game": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    }
+  }
+}
