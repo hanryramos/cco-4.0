@@ -529,11 +529,14 @@
 
   function updateUIForCurrentTab() {
     const btn1 = document.getElementById('btn-action-1');
+    const btn2 = document.getElementById('btn-action-2');
     const bannerText = document.getElementById('banner-text');
 
-    if (!btn1 || !bannerText) return;
+    if (!btn1 || !btn2 || !bannerText) return;
 
     btn1.style.display = 'inline-block';
+    // O botão verde (simulação de IA) existe apenas na página 4 — Prevenção de Descarrilamento.
+    btn2.style.display = currentTab === 'mod-descarrilamento' ? 'inline-block' : 'none';
 
     // A Central CCO é uma tela de monitoramento: não possui ações de simulação.
     const controlPanel = document.querySelector('.control-panel');
@@ -564,6 +567,7 @@
         bannerText.innerText = "Prevenção de Descarrilamento: Leitura de estabilidade do truque normal.";
         bannerText.style.color = "#e2e8f0";
         btn1.innerText = "💥 1. SIMULAR DESCARRILAMENTO";
+        btn2.innerText = "🛡️ PROTOCOLO SEGURANÇA IA";
         break;
 
       case 'mod-cco-center':
@@ -587,8 +591,8 @@
       'mod-descarrilamento': 'Prevenção de Descarrilamento',
       'mod-cco-center': 'Central CCO'
     };
-    const btn = document.getElementById('btn-action-1');
-    const textoAcao = btn?.innerText?.replace(/^💥\s*1\.\s*/,'').trim() || 'Simulação de ocorrência';
+    const btn = isSafe ? document.getElementById('btn-action-2') : document.getElementById('btn-action-1');
+    const textoAcao = btn?.innerText?.replace(/^💥\s*1\.\s*|^🛡️\s*/, '').trim() || (isSafe ? 'Ação segura' : 'Simulação de ocorrência');
     publicarEventoGameFirebase({
       type: 'CCO_SIMULATION_ACTION',
       titulo: isSafe ? 'Ação de prevenção executada' : 'Simulação executada',
@@ -2363,7 +2367,7 @@
 
   function atualizarControlesBloqueio() {
     const bloqueadoNestaAba = isCurrentTabBlocked();
-    ['btn-action-1'].forEach(id => {
+    ['btn-action-1', 'btn-action-2'].forEach(id => {
       const btn = document.getElementById(id);
       if (!btn) return;
       btn.classList.toggle('simulation-locked', bloqueadoNestaAba);
