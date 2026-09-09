@@ -685,25 +685,6 @@
       cursor: pointer;
     }
 
-    .game-quick-access {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-
-    .game-quick-access .quick-chip {
-      background: #1e293b;
-      color: #e2e8f0;
-      border: 1px solid #334155;
-      border-radius: 999px;
-      padding: 5px 10px;
-      font-size: 0.75rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .game-quick-access .quick-chip:hover { border-color: #38bdf8; color: #7dd3fc; }
-
     .game-login-status {
       display: flex;
       align-items: center;

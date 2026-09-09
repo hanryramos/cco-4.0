@@ -1635,7 +1635,6 @@
     if (!emailInput) return;
 
     const chkRemember = document.getElementById('game-remember-email');
-    const quickContainer = document.getElementById('game-quick-access');
     const hintBtn = document.getElementById('game-email-hint');
 
     // Lembrar e-mail
@@ -1644,26 +1643,6 @@
     if (lembrado) {
       emailInput.value = lembrado;
       if (chkRemember) chkRemember.checked = true;
-    }
-
-    // Acesso rápido: chips com os e-mails permitidos.
-    if (quickContainer && whitelist.length) {
-      quickContainer.innerHTML = '';
-      whitelist.forEach(email => {
-        const chip = document.createElement('button');
-        chip.type = 'button';
-        chip.className = 'quick-chip';
-        chip.textContent = email;
-        chip.title = 'Usar ' + email;
-        chip.addEventListener('click', () => {
-          emailInput.value = email;
-          emailInput.focus();
-          limparErroLogin();
-          if (hintBtn) hintBtn.hidden = true;
-        });
-        quickContainer.appendChild(chip);
-      });
-      quickContainer.hidden = false;
     }
 
     const atualizarHintDominio = () => {
