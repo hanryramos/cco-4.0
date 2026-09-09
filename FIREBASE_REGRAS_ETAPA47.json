@@ -1,5 +1,9 @@
 {
   "rules": {
+    "usuarios": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
     "operadores": {
       ".read": "auth != null",
       "$operadorKey": {

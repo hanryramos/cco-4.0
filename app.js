@@ -1606,7 +1606,7 @@
   /* ==========================================================================
      SISTEMA DE AUTENTICAÇÃO E GAME ENGINE
      ========================================================================== */
-  function realizarLoginGame() {
+  async function realizarLoginGame() {
     const emailInput = document.getElementById('game-user-email');
     const userEmail = emailInput ? emailInput.value.trim().toLowerCase() : '';
 
@@ -1615,16 +1615,54 @@
       return;
     }
 
-    if (!whitelist.includes(userEmail)) {
-      alert("Acesso negado: Este e-mail não está cadastrado na lista de permissões.");
+    const btnLogar = document.querySelector('.btn-game-primary');
+    const emailOriginalBtn = btnLogar ? btnLogar.textContent : '';
+    if (btnLogar) {
+      btnLogar.disabled = true;
+      btnLogar.textContent = 'Validando acesso...';
+    }
+
+    // 1) Tenta validar o e-mail contra o Realtime Database (/usuarios).
+    let usuarioFirebase = await buscarUsuarioFirebase(userEmail);
+
+    // 2) Se o nó /usuarios ainda não existir, inicializa-o com a lista
+    //    de permissões atual (migração) e reutiliza essa lista de validação.
+    if (!usuarioFirebase) {
+      const seed = await sembrarUsuariosFirebaseSeNecessario();
+      if (seed && seed[normalizarChaveEmail(userEmail)]) {
+        usuarioFirebase = seed[normalizarChaveEmail(userEmail)];
+      }
+    }
+
+    // 3) Fallback para a whitelist apenas quando o Firebase estiver
+    //    indisponível ou o usuário ainda não estiver refletido no banco.
+    const firebaseIndisponivel = !window.ccoFirebase || !window.ccoFirebase.ready;
+    const autorizadoByWhitelist = whitelist.includes(userEmail);
+
+    if (btnLogar) {
+      btnLogar.disabled = false;
+      btnLogar.textContent = emailOriginalBtn || 'ACESSAR SIMULADOR';
+    }
+
+    if (usuarioFirebase) {
+      if (usuarioFirebase.ativo === false) {
+        alert("Acesso negado: Este usuário está desativado no sistema.");
+        return;
+      }
+    } else if (firebaseIndisponivel || !autorizadoByWhitelist) {
+      alert("Acesso negado: Este e-mail não está cadastrado no sistema.");
       return;
     }
+
+    const ehAdmin = usuarioFirebase
+      ? usuarioFirebase.perfil === 'admin'
+      : userEmail === 'adm@vale.com';
 
     gameState.operador = userEmail;
     const modalLogin = document.getElementById('game-login-modal');
     if (modalLogin) modalLogin.style.display = 'none';
 
-    if (userEmail === "adm@vale.com") {
+    if (ehAdmin) {
       gameState.isAdmin = true;
 
       // O login de administrador já representa a entrada na Central ADM.
@@ -2221,16 +2259,75 @@ let firebaseGameStatusListener = null;
 let firebaseClearListener = null;
 let firebaseLastClearAt = 0;
 
+function normalizarChaveEmail(email) {
+  // Realtime Database não aceita chaves com . # $ [ ] / — então o e-mail é
+  // convertido em uma chave segura. Também é usada para o nó /usuarios.
+  return String(email || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+}
+
 function gerarChaveOperador(email) {
   // A autenticação anônima do Firebase identifica o navegador/sessão,
   // não o operador escolhido na tela de login. Por isso, dois logins
   // diferentes no mesmo perfil podem receber o MESMO Firebase UID.
   // A identidade operacional passa a ser derivada do e-mail autorizado.
-  return 'op_' + String(email || '')
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '_')
-    .replace(/^_+|_+$/g, '');
+  return 'op_' + normalizarChaveEmail(email);
+}
+
+// Busca o usuário no Realtime Database (/usuarios/<chave>). Retorna o
+// registro ({ email, nome, perfil, ativo }) ou null se não encontrado
+// ou se o Firebase estiver indisponível.
+async function buscarUsuarioFirebase(email) {
+  if (!window.ccoFirebase || !window.ccoFirebase.db || !window.ccoFirebase.ready) return null;
+  try {
+    await window.ccoFirebase.ready;
+  } catch (e) {
+    return null;
+  }
+  try {
+    const ref = window.ccoFirebase.db.ref(`usuarios/${normalizarChaveEmail(email)}`);
+    const snap = await ref.once('value');
+    if (snap.exists()) return snap.val();
+    return null;
+  } catch (error) {
+    console.error('[CCO 4.0] Erro ao consultar usuário no Firebase:', error);
+    return null;
+  }
+}
+
+// Se o nó /usuarios ainda não existir no Realtime Database (primeira vez),
+// cria-o a partir da lista de permissões atual. Assim o login passa a ser
+// gerenciado pelo Firebase em vez de depender da whitelist do código.
+async function sembrarUsuariosFirebaseSeNecessario() {
+  if (!window.ccoFirebase || !window.ccoFirebase.db || !window.ccoFirebase.ready) return null;
+  try {
+    await window.ccoFirebase.ready;
+  } catch (e) {
+    return null;
+  }
+  try {
+    const snap = await window.ccoFirebase.db.ref('usuarios').once('value');
+    if (snap.exists()) return null;
+    const seed = {};
+    whitelist.forEach(email => {
+      const chave = normalizarChaveEmail(email);
+      seed[chave] = {
+        email: email.toLowerCase().trim(),
+        nome: email.toLowerCase().trim().split('@')[0],
+        perfil: email.toLowerCase().trim() === 'adm@vale.com' ? 'admin' : 'operador',
+        ativo: true
+      };
+    });
+    await window.ccoFirebase.db.ref('usuarios').update(seed);
+    console.info('[CCO 4.0] Lista de usuários inicializada no Firebase (/usuarios).');
+    return seed;
+  } catch (error) {
+    console.error('[CCO 4.0] Falha ao inicializar usuários no Firebase:', error);
+    return null;
+  }
 }
 
 async function inicializarSincronizacaoFirebase() {
