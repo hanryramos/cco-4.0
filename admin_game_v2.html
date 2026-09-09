@@ -7,6 +7,19 @@
   <link rel="stylesheet" href="admin_game_v2.css">
 </head>
 <body>
+  <div id="admin-gate" class="admin-gate">
+    <div class="admin-gate-card">
+      <div class="admin-gate-icon">🔐</div>
+      <span class="eyebrow">CCO 4.0 • CENTRAL ADMINISTRATIVA</span>
+      <h2>Acesso restrito</h2>
+      <p>Informe o e-mail de administrador para acessar o controle do game. Apenas usuários com perfil <strong>admin</strong> podem entrar.</p>
+      <div id="admin-gate-error" class="admin-gate-error" hidden></div>
+      <input id="admin-gate-email" class="admin-gate-input" type="email" placeholder="seu.email@vale.com" autocomplete="off" spellcheck="false" />
+      <button id="admin-gate-enter" class="admin-gate-btn">ENTRAR NA CENTRAL</button>
+      <a href="index.html" class="admin-gate-back">← Voltar à plataforma do operador</a>
+    </div>
+  </div>
+
   <div class="admin-app">
 
     <header class="topbar">

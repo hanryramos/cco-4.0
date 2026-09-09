@@ -51,6 +51,69 @@ function esc(value) {
   }[char]));
 }
 
+/* --- Controle de acesso da Central Administrativa --- */
+const ADM_EMAILS_FALLBACK = ['adm@vale.com'];
+
+function normalizarEmailAdmin(email) {
+  let v = String(email || '').trim().toLowerCase();
+  if (v && !v.includes('@')) v += '@vale.com';
+  return v;
+}
+
+async function eEmailAdmin(email) {
+  const e = normalizarEmailAdmin(email);
+  if (!e) return false;
+  if (ADM_EMAILS_FALLBACK.includes(e)) return true;
+  try {
+    await window.ccoFirebase.ready;
+    const snap = await window.ccoFirebase.db.ref('usuarios').orderByChild('email').equalTo(e).once('value');
+    const reg = Object.values(snap.val() || {})[0];
+    return !!(reg && reg.perfil === 'admin' && reg.ativo !== false);
+  } catch (err) {
+    console.warn('[CCO ADM] Não foi possível validar e-mail admin no Firebase:', err);
+    return false;
+  }
+}
+
+function bloquearPainelADM() {
+  const gate = document.getElementById('admin-gate');
+  if (gate) gate.style.display = 'flex';
+  const err = document.getElementById('admin-gate-error');
+  const input = document.getElementById('admin-gate-email');
+  const btn = document.getElementById('admin-gate-enter');
+  if (err) err.hidden = true;
+
+  const entrar = async () => {
+    if (!input || !btn) return;
+    btn.disabled = true;
+    if (err) err.hidden = true;
+    try {
+      const email = input.value;
+      if (!(await eEmailAdmin(email))) {
+        if (err) { err.textContent = 'Acesso negado: e-mail sem perfil de administrador.'; err.hidden = false; }
+        btn.disabled = false;
+        input.focus();
+        return;
+      }
+      try { sessionStorage.setItem('cco40_admin_allowed', '1'); } catch (e) {}
+      liberarPainelADM();
+    } catch (e) {
+      console.error('[CCO ADM] Erro ao validar acesso:', e);
+      if (err) { err.textContent = 'Não foi possível validar o acesso. Tente novamente.'; err.hidden = false; }
+      btn.disabled = false;
+    }
+  };
+
+  btn.onclick = entrar;
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') entrar(); });
+  setTimeout(() => input.focus(), 120);
+}
+
+function liberarPainelADM() {
+  const gate = document.getElementById('admin-gate');
+  if (gate) gate.style.display = 'none';
+}
+
 function setText(id, value) {
   const el = $(id);
   if (el) el.textContent = value;
@@ -769,6 +832,13 @@ async function carregarResultadoAtualPersistido() {
 
 document.addEventListener('DOMContentLoaded', () => {
   atualizarControlesRegras();
+
+  // Gate de acesso: passa direto se o operador logado como admin redirecionou para cá
+  // (marca gravada no sessionStorage pelo app.js); caso contrário exige e-mail admin.
+  let sessaoAdminOk = false;
+  try { sessaoAdminOk = sessionStorage.getItem('cco40_admin_allowed') === '1'; } catch (e) {}
+  if (!sessaoAdminOk) bloquearPainelADM();
+
   const newGameBtn = $('new-game');
   if (newGameBtn) newGameBtn.onclick = () => novoGameADM();
   const clearBtn = $('clear-match');

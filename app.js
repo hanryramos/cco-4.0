@@ -11,6 +11,7 @@
   let ccoAssumeSeconds = 0;
   let ecoChartInstance = null;
   let vibrationChart = null;
+  let ccoSomAtivo = true;
 
   const gameState = {
     operador: '',
@@ -425,6 +426,15 @@
     atualizarStatusCentralCCO();
 
     inicializarTelaLogin();
+
+    // Restaura a preferência de som de alerta salva no dispositivo.
+    try { ccoSomAtivo = localStorage.getItem('cco40_som') !== '0'; } catch (e) {}
+    const btnSom = document.getElementById('btn-sound');
+    if (btnSom) {
+      btnSom.textContent = ccoSomAtivo ? '🔊' : '🔇';
+      btnSom.classList.toggle('muted', !ccoSomAtivo);
+      btnSom.title = ccoSomAtivo ? 'Desativar som de alerta' : 'Ativar som de alerta';
+    }
 
     atualizarTabSlider();
     window.addEventListener('resize', () => { atualizarTabSlider(); });
@@ -1038,6 +1048,8 @@
 
   function adicionarNotificacaoSidebar(titulo, mensagem, ocorrencia = null) {
     const evento = criarEventoCCO(titulo, mensagem, ocorrencia);
+    // Alerta sonoro para eventos críticos e graves (respeitando o mudo do operador).
+    if (evento.severidade === 'critico' || evento.severidade === 'grave') tocarAlertaSonoro(evento.severidade);
     ccoEvents.unshift(evento);
     publicarEventoGameFirebase({
       type: 'CCO_EVENT_CREATED',
@@ -1054,6 +1066,52 @@
   }
 
   let ultimoBadgeCount = 0;
+
+  /* --- ALERTA SONORO (WebAudio, sem arquivos externos) --- */
+  function tocarAlertaSonoro(severidade) {
+    if (!ccoSomAtivo) return;
+    try {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      const ctx = new Ctx();
+      const nota = (freq, inicio, dur, tipo = 'square') => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = tipo;
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0, ctx.currentTime + inicio);
+        gain.gain.linearRampToValueAtTime(0.14, ctx.currentTime + inicio + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + inicio + dur);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime + inicio);
+        osc.stop(ctx.currentTime + inicio + dur + 0.05);
+      };
+      if (severidade === 'critico') {
+        nota(880, 0, 0.18);
+        nota(880, 0.26, 0.18);
+        nota(880, 0.52, 0.3);
+        nota(440, 0.13, 0.2);
+      } else if (severidade === 'grave') {
+        nota(660, 0, 0.16);
+        nota(660, 0.24, 0.26);
+      } else {
+        nota(523, 0, 0.16, 'sine');
+      }
+      setTimeout(() => { try { ctx.close(); } catch (e) {} }, 1500);
+    } catch (e) { /* áudio indisponível neste browser */ }
+  }
+
+  function alternarSomAlerta() {
+    ccoSomAtivo = !ccoSomAtivo;
+    const btn = document.getElementById('btn-sound');
+    if (btn) {
+      btn.textContent = ccoSomAtivo ? '🔊' : '🔇';
+      btn.classList.toggle('muted', !ccoSomAtivo);
+      btn.title = ccoSomAtivo ? 'Desativar som de alerta' : 'Ativar som de alerta';
+    }
+    try { localStorage.setItem('cco40_som', ccoSomAtivo ? '1' : '0'); } catch (e) {}
+  }
 
   function renderizarEventosCCO() {
     const container = document.getElementById('notifications-container');
@@ -1875,6 +1933,10 @@
 
     if (ehAdmin) {
       gameState.isAdmin = true;
+
+      // Autoriza o acesso direto à Central Administrativa
+      // nesta aba/sessão (a página ADM valida esta marca).
+      try { sessionStorage.setItem('cco40_admin_allowed', '1'); } catch (e) {}
 
       // O login de administrador já representa a entrada na Central ADM.
       // Não passa mais pela tela do CCO nem exige um segundo clique.

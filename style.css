@@ -1876,6 +1876,21 @@ html,body { max-width:100%; overflow-x:hidden; }
 /* ================================================================
    ETAPA 41 — TUTORIAL DE BOAS-VINDAS CCO 4.0
    ================================================================ */
+.cco-sound-trigger {
+  border: 1px solid rgba(56, 189, 248, .30);
+  background: rgba(15, 23, 42, .82);
+  color: #cbd5e1;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: .2s ease;
+}
+.cco-sound-trigger:hover { border-color: #38bdf8; color: #fff; transform: translateY(-1px); }
+.cco-sound-trigger.muted { border-color: rgba(148, 163, 184, .35); color: #64748b; }
+
 .cco-tutorial-trigger {
   border: 1px solid rgba(56, 189, 248, .30);
   background: rgba(15, 23, 42, .82);
@@ -1957,6 +1972,7 @@ html,body { max-width:100%; overflow-x:hidden; }
 }
 
 @media (max-width:650px) {
+  .cco-sound-trigger { padding:6px 8px; font-size:12px; }
   .cco-tutorial-trigger { padding:6px 8px; font-size:10px; }
   .cco-tutorial-card { padding:20px; border-radius:15px; }
   .cco-tutorial-card h2 { font-size:21px; }

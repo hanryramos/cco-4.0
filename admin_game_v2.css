@@ -1,4 +1,19 @@
 *{box-sizing:border-box}
+.admin-gate{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(circle at 50% 30%,#0d2b45 0,transparent 55%),radial-gradient(circle at 15% 0,#0b2031 0,transparent 34%),#070b12}
+.admin-gate-card{width:100%;max-width:420px;background:#0e1622;border:1px solid #1b2a3d;border-radius:16px;padding:34px 30px 28px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.45)}
+.admin-gate-icon{display:inline-flex;align-items:center;justify-content:center;width:58px;height:58px;border-radius:50%;font-size:26px;background:#0a1626;border:1px solid #1d3a5c;margin-bottom:16px;box-shadow:0 0 26px rgba(56,189,248,.18)}
+.admin-gate-card h2{font-size:21px;color:#f5f9ff;margin:8px 0 8px}
+.admin-gate-card p{color:#8ba0b8;font-size:13px;line-height:1.6;margin:0 0 18px}.admin-gate-card p strong{color:#fca5a5}
+.admin-gate-error{background:#3b0f19;border:1px solid #b91c1c;color:#fecaca;border-radius:8px;padding:9px 12px;font-size:12px;margin-bottom:12px}
+.admin-gate-input{width:100%;background:#0a111b;border:1px solid #20324b;border-radius:9px;padding:13px 14px;color:#e6f0fa;font-size:14px;outline:none;transition:border-color .2s,box-shadow .2s;margin-bottom:12px}
+.admin-gate-input:focus{border-color:#28b9f5;box-shadow:0 0 0 3px rgba(40,185,245,.15)}
+.admin-gate-input::placeholder{color:#54667c}
+.admin-gate-btn{width:100%;background:linear-gradient(180deg,#2563eb,#1d4ed8);border:0;border-radius:9px;padding:14px;color:#fff;font-size:13px;font-weight:900;letter-spacing:.6px;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,filter .18s ease}
+.admin-gate-btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(37,99,235,.4)}
+.admin-gate-btn:active{transform:translateY(0) scale(.985)}
+.admin-gate-btn:disabled{opacity:.6;cursor:wait}
+.admin-gate-back{display:inline-block;margin-top:16px;color:#6f8399;font-size:12px;text-decoration:none}
+.admin-gate-back:hover{color:#28b9f5}
 :root{font-family:Inter,Segoe UI,Arial,sans-serif;color:#dbe7f5;background:#070b12}
 body{margin:0;background:radial-gradient(circle at 15% 0,#0b2031 0,transparent 34%),radial-gradient(circle at 90% 100%,#101b32 0,transparent 38%),#070b12;min-height:100vh}
 .admin-app{min-height:100vh}
