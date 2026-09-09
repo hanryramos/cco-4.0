@@ -424,13 +424,6 @@
     if (currentTab === 'mod-cco-center') iniciarPrazosAssumirCCO();
     atualizarStatusCentralCCO();
 
-    const btnReset = document.getElementById('btn-reset');
-    if (btnReset) {
-      btnReset.addEventListener('click', () => {
-        retomarAnimacaoTrem();
-      });
-    }
-
     inicializarTelaLogin();
 
     atualizarTabSlider();
@@ -536,13 +529,11 @@
 
   function updateUIForCurrentTab() {
     const btn1 = document.getElementById('btn-action-1');
-    const btn2 = document.getElementById('btn-action-2');
     const bannerText = document.getElementById('banner-text');
 
-    if (!btn1 || !btn2 || !bannerText) return;
+    if (!btn1 || !bannerText) return;
 
     btn1.style.display = 'inline-block';
-    btn2.style.display = 'inline-block';
 
     // A Central CCO é uma tela de monitoramento: não possui ações de simulação.
     const controlPanel = document.querySelector('.control-panel');
@@ -555,35 +546,30 @@
         bannerText.innerText = "Análise Dinâmica de Via: Pátio RAMP operando normalmente.";
         bannerText.style.color = "#e2e8f0";
         btn1.innerText = "💥 1. SIMULAR CONGESTIONAMENTO RAMP";
-        btn2.innerText = "🛡️ OTIMIZAR MALHA COM RAMP";
         break;
 
       case 'mod-ia':
         bannerText.innerText = "Sistemas Preditivos: Monitoramento de eixos e temperaturas ativo.";
         bannerText.style.color = "#e2e8f0";
         btn1.innerText = "💥 1. SIMULAR SOBREAQUECIMENTO";
-        btn2.innerText = "🛡️ APLICAR MANUTENÇÃO PREDITIVA";
         break;
 
       case 'mod-eco':
         bannerText.innerText = "Eco-Driving: Algoritmo de aceleração atuando na composição.";
         bannerText.style.color = "#e2e8f0";
         btn1.innerText = "💥 1. SIMULAR MODO MANUAL (DESECOLÓGICO)";
-        btn2.innerText = "🛡️ ATIVAR ECO-DRIVING PREDITIVO";
         break;
 
       case 'mod-descarrilamento':
         bannerText.innerText = "Prevenção de Descarrilamento: Leitura de estabilidade do truque normal.";
         bannerText.style.color = "#e2e8f0";
         btn1.innerText = "💥 1. SIMULAR DESCARRILAMENTO";
-        btn2.innerText = "🛡️ PROTOCOLO SEGURANÇA IA";
         break;
 
       case 'mod-cco-center':
         bannerText.innerText = "Central CCO 4.0: Visualização integrada e log de eventos em tempo real.";
         bannerText.style.color = "#e2e8f0";
         btn1.innerText = "💥 1. SIMULAR ALERTA GLOBAL CCO";
-        btn2.innerText = "🛡️ CONFIRMAR LEITURAS DAS VIAS";
         break;
     }
   }
@@ -601,8 +587,8 @@
       'mod-descarrilamento': 'Prevenção de Descarrilamento',
       'mod-cco-center': 'Central CCO'
     };
-    const btn = isSafe ? document.getElementById('btn-action-2') : document.getElementById('btn-action-1');
-    const textoAcao = btn?.innerText?.replace(/^💥\s*1\.\s*|^🛡️\s*/, '').trim() || (isSafe ? 'Ação segura' : 'Simulação de ocorrência');
+    const btn = document.getElementById('btn-action-1');
+    const textoAcao = btn?.innerText?.replace(/^💥\s*1\.\s*/,'').trim() || 'Simulação de ocorrência';
     publicarEventoGameFirebase({
       type: 'CCO_SIMULATION_ACTION',
       titulo: isSafe ? 'Ação de prevenção executada' : 'Simulação executada',
@@ -2377,8 +2363,7 @@
 
   function atualizarControlesBloqueio() {
     const bloqueadoNestaAba = isCurrentTabBlocked();
-    const ids = ['btn-action-1', 'btn-action-2', 'btn-reset'];
-    ids.forEach(id => {
+    ['btn-action-1'].forEach(id => {
       const btn = document.getElementById(id);
       if (!btn) return;
       btn.classList.toggle('simulation-locked', bloqueadoNestaAba);

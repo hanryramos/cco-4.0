@@ -711,6 +711,51 @@ $('stop').onclick = async () => {
   }
 };
 
+async function novoGameADM() {
+  if (!confirm('ZERAR TODAS AS INFORMAÇÕES e iniciar um NOVO GAME?\n\nIsso apaga do Firebase: operadores, pontuações, histórico de treinamento, eventos do Game Oficial, resultados e desafios.\n\nOperadores e ADM voltam ao estado inicial. Esta ação não pode ser desfeita.')) return;
+  try {
+    await window.ccoFirebase.ready;
+    const agora = Date.now();
+    // Substitui o nó /game por completo (events, resultados, ultimoResultado, desafios e flags) e
+    // grava os marcadores de limpeza para os operadores zerarem suas telas.
+    await window.ccoFirebase.db.ref('game').set({
+      status: 'training',
+      sessionId: null,
+      rulesPresented: false,
+      rulesVisible: false,
+      clearRequestedAt: firebase.database.ServerValue.TIMESTAMP,
+      desafiosLimparEm: agora,
+      resetEm: firebase.database.ServerValue.TIMESTAMP
+    });
+    // Remove os operadores persistidos; cada um se registra novamente ao sincronizar.
+    await window.ccoFirebase.db.ref('operadores').remove();
+
+    currentSessionId = null;
+    adminState.phase = 'training';
+    adminState.events = adminState.correct = adminState.wrong = adminState.timeouts = adminState.blocks = adminState.points = 0;
+    adminState.operators.clear();
+    adminState.trainingFeed = [];
+    adminState.officialFeed = [];
+    adminState.officialActiveEvents = 0;
+    adminState.officialDecisions = 0;
+    adminState.rulesPresented = false;
+    adminState.rulesVisible = false;
+    adminState.finalResults = [];
+    adminState.selectedOperatorKey = null;
+    adminState.challenges.clear();
+    adminState.selectedChallengeId = null;
+    adminState.challengeClearAt = agora;
+    setPhase('training');
+    atualizarControlesRegras();
+    render();
+    alert('NOVO GAME preparado! Todas as informações foram limpas. Os operadores devem refazer o login para reiniciar a partida.');
+  } catch (e) {
+    console.error('[CCO ADM] Erro ao zerar o Game:', e);
+    alert('Não foi possível zerar o Game. Verifique o Firebase.');
+  }
+}
+
+/* eslint-disable-next-line no-unused-vars */
 async function carregarResultadoAtualPersistido() {
   try {
     const snap = await window.ccoFirebase.db.ref('game/ultimoResultado').once('value');
@@ -724,6 +769,8 @@ async function carregarResultadoAtualPersistido() {
 
 document.addEventListener('DOMContentLoaded', () => {
   atualizarControlesRegras();
+  const newGameBtn = $('new-game');
+  if (newGameBtn) newGameBtn.onclick = () => novoGameADM();
   const clearBtn = $('clear-match');
   if (clearBtn) clearBtn.onclick = async () => {
     if (!confirm('Limpar participantes e pontuacoes para preparar uma nova partida? O historico continuara salvo no Firebase.')) return;

@@ -623,10 +623,6 @@
     }
 
     .btn-simular:hover { background: #dc2626; transform: translateY(-1px); box-shadow: 0 6px 14px rgba(239, 68, 68, .28); }
-    .btn-safe { background: #10b981; }
-    .btn-safe:hover { background: #059669; transform: translateY(-1px); box-shadow: 0 6px 14px rgba(16, 185, 129, .28); }
-    .btn-reset { background: #475569; flex: 0.4; }
-    .btn-reset:hover { background: #3f4b60; transform: translateY(-1px); box-shadow: 0 6px 14px rgba(100, 116, 139, .28); }
 
     .notification-popup {
       position: absolute;
@@ -1526,9 +1522,7 @@ body:has(#mod-cco-center.active) .control-panel {
 #operator-block-overlay { display: none !important; }
 body.operator-is-blocked { overflow: hidden; }
 
-#btn-action-1.simulation-locked,
-#btn-action-2.simulation-locked,
-#btn-reset.simulation-locked {
+#btn-action-1.simulation-locked {
   opacity: .42 !important;
   cursor: not-allowed !important;
   filter: grayscale(.55);
