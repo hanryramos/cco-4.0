@@ -3401,8 +3401,17 @@ async function responderConviteDesafio(aceitar) {
   await window.ccoFirebase.db.ref(`operadores/${firebaseOperatorKey}/desafioAtivo`).set(desafioAtualId);
 }
 
+function normalizarOcorrenciasDesafio(v) {
+  if (Array.isArray(v)) return v.filter(Boolean);
+  if (v && typeof v === 'object') {
+    // Firebase grava arrays como objeto {0:..,1:..}; converte de volta na ordem.
+    return Object.keys(v).sort((a, b) => Number(a) - Number(b)).map(k => v[k]).filter(Boolean);
+  }
+  return [];
+}
+
 function obterOcorrenciaDesafio(d, indice) {
-  const ocorrencias = Array.isArray(d?.ocorrencias) ? d.ocorrencias : [];
+  const ocorrencias = normalizarOcorrenciasDesafio(d?.ocorrencias);
   const id = Number(ocorrencias[indice]);
   const banco = Array.isArray(bancoIncidentes) ? bancoIncidentes : [];
   let occ = banco.find(x => Number(x.id) === id);
