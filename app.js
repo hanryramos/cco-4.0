@@ -131,6 +131,77 @@
     }
   });
 
+  /*
+   * OCORRÊNCIAS PRÁTICAS DO DESAFIO 1x1
+   * Duas modalidades de interação além do quiz tradicional:
+   *  - 'parametros': o operador ajusta prioridade + resposta operacional por segmentos.
+   *  - 'pratica'   : o operador executa a ação clicando no mapa da malha.
+   * Estes itens ficam fora de bancoIncidentes (NÃO entram no Game Oficial);
+   * são usados apenas na sequência do desafio via gerarSequenciaDesafio.
+   */
+  const bancoIncidentesPraticos = [
+    {
+      id: 101, tipo: 'parametros', titulo: '⚙️ Gargalo de Pátio RAMP',
+      criticidade: 'grave', descricao: 'O Pátio RAMP ultrapassou a capacidade nominal e novas composições se aproximam. Defina a prioridade e a resposta operacional corretas.',
+      parametros: {
+        prioridade: 'grave', acao: 'restringir',
+        opcoesAcao: [
+          { chave: 'monitorar', rotulo: 'Monitorar de perto', icone: '📊' },
+          { chave: 'supervisionar', rotulo: 'Supervisionar fluxo', icone: '🔁' },
+          { chave: 'restringir', rotulo: 'Restringir entradas', icone: '🚧' },
+          { chave: 'bloquear', rotulo: 'Bloquear circulação', icone: '⛔' }
+        ]
+      },
+      risco: 'Priorizar segurança e reorganizar o fluxo do pátio.'
+    },
+    {
+      id: 102, tipo: 'parametros', titulo: '⚙️ Alerta Preditivo de Rodas',
+      criticidade: 'critico', descricao: 'O sistema detecta impacto de roda acima do limite em uma composição em movimento. Defina a prioridade e a resposta operacional corretas.',
+      parametros: {
+        prioridade: 'critico', acao: 'restringir',
+        opcoesAcao: [
+          { chave: 'monitorar', rotulo: 'Apenas monitorar', icone: '📊' },
+          { chave: 'supervisionar', rotulo: 'Supervisionar até o destino', icone: '🔁' },
+          { chave: 'restringir', rotulo: 'Restringir e direcionar a inspeção', icone: '🚧' },
+          { chave: 'bloquear', rotulo: 'Bloquear imediatamente', icone: '⛔' }
+        ]
+      },
+      risco: 'Conter o risco mecânico antes que ele evolua.'
+    },
+    {
+      id: 103, tipo: 'parametros', titulo: '⚙️ Consumo Acima da Meta',
+      criticidade: 'moderado', descricao: 'O consumo energético acumulado está acima da meta planejada para o trecho. Defina a prioridade e a resposta operacional corretas.',
+      parametros: {
+        prioridade: 'moderado', acao: 'monitorar',
+        opcoesAcao: [
+          { chave: 'monitorar', rotulo: 'Monitorar e ajustar condução', icone: '📊' },
+          { chave: 'supervisionar', rotulo: 'Supervisionar perfil de condução', icone: '🔁' },
+          { chave: 'restringir', rotulo: 'Restringir velocidade', icone: '🚧' },
+          { chave: 'bloquear', rotulo: 'Bloquear circulação', icone: '⛔' }
+        ]
+      },
+      risco: 'Eficiência sem comprometer o perfil seguro de condução.'
+    },
+    {
+      id: 201, tipo: 'pratica', titulo: '🎯 Priorize o Trem com HotBox',
+      criticidade: 'grave', descricao: 'A IA sinaliza HotBox em elevação em uma composição. Identifique o trem anômalo no mapa e clique nele para direcionar a inspeção.',
+      pratica: { alvo: 'train4', instrucao: 'Clique no trem que apresenta HotBox em elevação.' },
+      risco: 'Concentrar a resposta na composição sob risco térmico.'
+    },
+    {
+      id: 202, tipo: 'pratica', titulo: '🎯 Interrompa o Trem em Conflito de Rota',
+      criticidade: 'critico', descricao: 'O sinal indicou divergência grave na rota. No mapa, clique no trem que deve ser interrompido antes do trecho em conflito.',
+      pratica: { alvo: 'train2', instrucao: 'Clique no trem que deve ser interrompido por conflito de rota.' },
+      risco: 'Evitar o encontro de dois movimentos na mesma janela.'
+    },
+    {
+      id: 203, tipo: 'pratica', titulo: '🎯 Libere o Trem Prioritário',
+      criticidade: 'moderado', descricao: 'Uma composição de maior prioridade aguarda liberação na malha. Clique no trem que deve avançar primeiro.',
+      pratica: { alvo: 'train1', instrucao: 'Clique no trem que deve ser liberado primeiro.' },
+      risco: 'Reduzir retenção sem comprometer a segurança da rota.'
+    }
+  ];
+
 
   /*
    * BANCO DE OCORRÊNCIAS DO TREINAMENTO
@@ -3021,6 +3092,9 @@ let desafioListener = null;
 let desafioAtualId = null;
 let desafioAtual = null;
 let desafioRespostaSelecionada = null;
+let desafioPrioridadeSelecionada = null;
+let desafioAcaoSelecionada = null;
+let desafioAlvoSelecionado = null;
 let desafioTimer = null;
 let desafioRenderIndex = -1;
 const DESAFIO_PERCENTUAL = 0.20;
@@ -3149,8 +3223,19 @@ function normalizarRespostasDesafio(valor) {
 
 function gerarSequenciaDesafio() {
   const banco = Array.isArray(bancoIncidentes) ? bancoIncidentes.filter(Boolean) : [];
-  const pool = banco.slice();
+  const praticos = Array.isArray(bancoIncidentesPraticos) ? bancoIncidentesPraticos.filter(Boolean) : [];
   const resultado = [];
+
+  // Mistura até 4 ocorrências práticas (parâmetros + mapa) entre as 10 rodadas.
+  const limitePraticos = Math.min(4, praticos.length, DESAFIO_RODADAS);
+  const poolPraticos = praticos.slice();
+  while (resultado.length < limitePraticos && poolPraticos.length) {
+    const idx = Math.floor(Math.random() * poolPraticos.length);
+    const escolhido = poolPraticos.splice(idx, 1)[0];
+    if (escolhido && escolhido.id != null) resultado.push(escolhido.id);
+  }
+
+  const pool = banco.slice();
   while (resultado.length < DESAFIO_RODADAS && pool.length) {
     const idx = Math.floor(Math.random() * pool.length);
     const escolhido = pool.splice(idx,1)[0];
@@ -3162,6 +3247,14 @@ function gerarSequenciaDesafio() {
     if (item && item.id != null) resultado.push(item.id);
     i++;
     if (i > banco.length * 2) break;
+  }
+
+  // Embaralha para intercalar quiz e missões práticas.
+  for (let k = resultado.length - 1; k > 0; k--) {
+    const j = Math.floor(Math.random() * (k + 1));
+    const tmp = resultado[k];
+    resultado[k] = resultado[j];
+    resultado[j] = tmp;
   }
   return resultado;
 }
@@ -3307,7 +3400,11 @@ function obterOcorrenciaDesafio(d, indice) {
   const ocorrencias = Array.isArray(d?.ocorrencias) ? d.ocorrencias : [];
   const id = Number(ocorrencias[indice]);
   const banco = Array.isArray(bancoIncidentes) ? bancoIncidentes : [];
-  return banco.find(x => Number(x.id) === id) || banco[0] || null;
+  let occ = banco.find(x => Number(x.id) === id);
+  if (!occ && Array.isArray(bancoIncidentesPraticos)) {
+    occ = bancoIncidentesPraticos.find(x => Number(x.id) === id);
+  }
+  return occ || banco[0] || null;
 }
 
 function atualizarBarrasDesafio() {
@@ -3320,6 +3417,118 @@ function atualizarBarrasDesafio() {
   const barOp = document.getElementById('challenge-op-bar');
   if (barMe) barMe.style.width = pctMe + '%';
   if (barOp) barOp.style.width = (100 - pctMe) + '%';
+}
+
+function renderOpcoesQuizDesafio(options, occ) {
+  options.innerHTML = (occ.opcoes||[]).map((o,i)=>`<button class="challenge-option" data-index="${i}">${escapeHtmlDesafio(o.texto)}</button>`).join('');
+  options.querySelectorAll('.challenge-option').forEach(btn => {
+    btn.addEventListener('click',()=> {
+      if (btn.disabled) return;
+      options.querySelectorAll('.challenge-option').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected');
+      desafioRespostaSelecionada = Number(btn.dataset.index);
+      const btnAnswer = document.getElementById('challenge-answer-btn');
+      if (btnAnswer) btnAnswer.disabled = false;
+    });
+  });
+}
+
+function renderOpcoesParametrosDesafio(options, occ) {
+  const p = occ.parametros || {};
+  const niveis = [
+    { chave: 'moderado', rotulo: 'MODERADO', cor: 'amber' },
+    { chave: 'grave', rotulo: 'GRAVE', cor: 'orange' },
+    { chave: 'critico', rotulo: 'CRÍTICO', cor: 'red' }
+  ];
+  const acoes = Array.isArray(p.opcoesAcao) ? p.opcoesAcao : [];
+
+  options.innerHTML = `
+    <div class="challenge-param-group">
+      <span class="challenge-param-label">PRIORIDADE</span>
+      <div class="challenge-param-opts" data-role="prioridade">
+        ${niveis.map(n => `<button type="button" class="challenge-param-seg is-${n.cor}" data-val="${n.chave}">${n.rotulo}</button>`).join('')}
+      </div>
+    </div>
+    <div class="challenge-param-group">
+      <span class="challenge-param-label">RESPOSTA OPERACIONAL</span>
+      <div class="challenge-param-opts" data-role="acao">
+        ${acoes.map(a => `<button type="button" class="challenge-param-seg is-action" data-val="${escapeHtmlDesafio(a.chave)}">${a.icone || ''} ${escapeHtmlDesafio(a.rotulo)}</button>`).join('')}
+      </div>
+    </div>
+    <p class="challenge-param-hint">Ajuste os dois parâmetros e confirme sua decisão.</p>`;
+
+  const resolver = () => {
+    const btn = document.getElementById('challenge-answer-btn');
+    if (btn) btn.disabled = !(desafioPrioridadeSelecionada && desafioAcaoSelecionada);
+  };
+
+  options.querySelectorAll('[data-role="prioridade"] .challenge-param-seg').forEach(btn => {
+    btn.addEventListener('click', () => {
+      options.querySelectorAll('[data-role="prioridade"] .challenge-param-seg').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      desafioPrioridadeSelecionada = btn.dataset.val;
+      resolver();
+    });
+  });
+  options.querySelectorAll('[data-role="acao"] .challenge-param-seg').forEach(btn => {
+    btn.addEventListener('click', () => {
+      options.querySelectorAll('[data-role="acao"] .challenge-param-seg').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      desafioAcaoSelecionada = btn.dataset.val;
+      resolver();
+    });
+  });
+}
+
+function renderMissaoPraticaDesafio(options, occ) {
+  const instrucao = occ.pratica?.instrucao || 'Clique no elemento correto do mapa.';
+  options.innerHTML = `
+    <div class="challenge-map-wrap">
+      <svg class="challenge-map" viewBox="0 0 800 270" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Malha ferroviária interativa">
+        <rect width="100%" height="100%" fill="#071019"/>
+        <path d="M 20 30 L 780 30" class="challenge-track"/>
+        <path d="M 20 70 L 250 70 L 450 50 L 780 50" class="challenge-track"/>
+        <path d="M 20 110 L 780 110" class="challenge-track"/>
+        <path d="M 20 150 L 320 150 L 550 170 L 780 170" class="challenge-track"/>
+        <path d="M 20 210 L 780 210" class="challenge-track"/>
+        <path d="M 20 250 L 780 250" class="challenge-track"/>
+        <circle cx="350" cy="62" r="5" fill="#0e2a3f" stroke="#00f2fe" stroke-width="1.4"/>
+        <text x="312" y="44" fill="#00f2fe" font-size="9" font-weight="bold">PÁTIO RAMP (KM 42)</text>
+        <circle cx="430" cy="160" r="5" fill="#0e2a3f" stroke="#f59e0b" stroke-width="1.4"/>
+        <text x="392" y="146" fill="#f59e0b" font-size="9" font-weight="bold">SENSOR WILD (KM 108)</text>
+        <g class="challenge-target" data-target="train2" transform="translate(360,64)">
+          <rect width="26" height="9" rx="2" y="0" class="challenge-train-body"/>
+          <text y="7" x="2" font-size="7" fill="#0b1a27" font-weight="bold">EFVM-80</text>
+        </g>
+        <g class="challenge-target" data-target="train1" transform="translate(90,24)">
+          <rect width="26" height="9" rx="2" y="0" class="challenge-train-body"/>
+          <text y="7" x="2" font-size="7" fill="#0b1a27" font-weight="bold">VL-102</text>
+        </g>
+        <g class="challenge-target" data-target="train5" transform="translate(560,204)">
+          <rect width="26" height="9" rx="2" y="0" class="challenge-train-body"/>
+          <text y="7" x="2" font-size="7" fill="#0b1a27" font-weight="bold">VL-501</text>
+        </g>
+        <g class="challenge-target" data-target="train4" transform="translate(180,144)">
+          <rect width="26" height="9" rx="2" y="0" class="challenge-train-body"/>
+          <text y="7" x="2" font-size="7" fill="#0b1a27" font-weight="bold">MIN-99</text>
+        </g>
+        <g class="challenge-target" data-target="signalA" transform="translate(450,40)">
+          <rect width="14" height="14" rx="3" class="challenge-signal-body"/>
+          <circle cx="7" cy="7" r="3" class="challenge-signal-lamp"/>
+        </g>
+      </svg>
+      <p class="challenge-map-hint">${escapeHtmlDesafio(instrucao)}</p>
+    </div>`;
+
+  options.querySelectorAll('.challenge-target').forEach(el => {
+    el.addEventListener('click', () => {
+      options.querySelectorAll('.challenge-target').forEach(t => t.classList.remove('selected'));
+      el.classList.add('selected');
+      desafioAlvoSelecionado = el.dataset.target;
+      const btn = document.getElementById('challenge-answer-btn');
+      if (btn) btn.disabled = false;
+    });
+  });
 }
 
 function renderizarDesafioAtivo(d) {
@@ -3359,24 +3568,30 @@ function renderizarDesafioAtivo(d) {
   const occ = obterOcorrenciaDesafio(d, indice);
   if (!occ) return;
   document.getElementById('challenge-progress').textContent = `Ocorrência ${indice+1} de ${DESAFIO_RODADAS}`;
-  document.getElementById('challenge-card-meta').textContent = `REPASSE · ${(occ.criticidade||'moderado').toUpperCase()}`;
+  const metaTipo = occ.tipo === 'pratica' ? 'MISSÃO PRÁTICA'
+    : occ.tipo === 'parametros' ? 'AJUSTE DE PARÂMETROS' : 'REPASSE';
+  document.getElementById('challenge-card-meta').textContent = `${metaTipo} · ${(occ.criticidade||'moderado').toUpperCase()}`;
   document.getElementById('challenge-card-title').textContent = occ.titulo;
   document.getElementById('challenge-card-description').textContent = occ.descricao;
   const options = document.getElementById('challenge-card-options');
-  options.innerHTML = (occ.opcoes||[]).map((o,i)=>`<button class="challenge-option" data-index="${i}">${escapeHtmlDesafio(o.texto)}</button>`).join('');
   desafioRespostaSelecionada = null;
-  options.querySelectorAll('.challenge-option').forEach(btn => {
-    btn.addEventListener('click',()=> {
-      if (btn.disabled) return;
-      options.querySelectorAll('.challenge-option').forEach(b=>b.classList.remove('selected'));
-      btn.classList.add('selected');
-      desafioRespostaSelecionada = Number(btn.dataset.index);
-      document.getElementById('challenge-answer-btn').disabled = false;
-    });
-  });
+  desafioPrioridadeSelecionada = null;
+  desafioAcaoSelecionada = null;
+  desafioAlvoSelecionado = null;
+
   const answer = document.getElementById('challenge-answer-btn');
   answer.disabled = true;
   answer.onclick = () => responderOcorrenciaDesafio(false);
+  answer.textContent = (occ.tipo === 'pratica' || occ.tipo === 'parametros') ? 'CONFIRMAR DECISÃO' : 'Responder';
+
+  if (occ.tipo === 'parametros') {
+    renderOpcoesParametrosDesafio(options, occ);
+  } else if (occ.tipo === 'pratica') {
+    renderMissaoPraticaDesafio(options, occ);
+  } else {
+    renderOpcoesQuizDesafio(options, occ);
+  }
+
   if (desafioRenderIndex !== indice) {
     desafioRenderIndex = indice;
     iniciarTimerDesafio(d, indice);
@@ -3430,10 +3645,43 @@ async function responderOcorrenciaDesafio(timeout=false) {
 
     let correta = false;
     let delta = 0;
+    let parcial = false;
     let resposta = 'timeout';
 
-    // Resposta manual: somente uma opção realmente selecionada pode gerar acerto/erro.
-    if (!timeout && desafioRespostaSelecionada !== null) {
+    // Resposta manual: apenas interações realmente concluídas geram acerto/erro.
+    if (!timeout && occ.tipo === 'parametros') {
+      const esperado = occ.parametros || {};
+      const acertoPrioridade = desafioPrioridadeSelecionada === esperado.prioridade;
+      const acertoAcao = desafioAcaoSelecionada === esperado.acao;
+      resposta = { prioridade: desafioPrioridadeSelecionada || '', acao: desafioAcaoSelecionada || '' };
+      correta = Boolean(acertoPrioridade && acertoAcao);
+      const pontosPadrao = occ.criticidade === 'critico'
+        ? 150
+        : (occ.criticidade === 'grave' ? 100 : 70);
+      const penalidadePadrao = occ.criticidade === 'critico'
+        ? 100
+        : (occ.criticidade === 'grave' ? 80 : 50);
+      if (correta) {
+        delta = pontosPadrao;
+      } else if (acertoPrioridade || acertoAcao) {
+        // Acertou um dos dois parâmetros: pontuação parcial.
+        parcial = true;
+        delta = Math.round(pontosPadrao * 0.4);
+      } else {
+        delta = -penalidadePadrao;
+      }
+    } else if (!timeout && occ.tipo === 'pratica') {
+      const alvoEsperado = occ.pratica?.alvo || '';
+      correta = desafioAlvoSelecionado === alvoEsperado;
+      resposta = desafioAlvoSelecionado || 'nenhum';
+      const pontosPadrao = occ.criticidade === 'critico'
+        ? 150
+        : (occ.criticidade === 'grave' ? 100 : 70);
+      const penalidadePadrao = occ.criticidade === 'critico'
+        ? 100
+        : (occ.criticidade === 'grave' ? 80 : 50);
+      delta = correta ? pontosPadrao : -penalidadePadrao;
+    } else if (!timeout && desafioRespostaSelecionada !== null) {
       const opt = occ.opcoes?.[desafioRespostaSelecionada];
 
       // Aceita tanto boolean true quanto string "true".
@@ -3464,6 +3712,7 @@ async function responderOcorrenciaDesafio(timeout=false) {
       ocorrenciaId: occ.id,
       resposta,
       correta,
+      parcial: !!parcial,
       pontos: delta,
       respondidoEm: Date.now()
     };
@@ -3494,6 +3743,7 @@ async function responderOcorrenciaDesafio(timeout=false) {
     mostrarFeedbackDesafio({
       correta,
       timeout,
+      parcial,
       delta: pontosDepois - pontosAntes,
       pontosAntes,
       pontosDepois,
@@ -3501,6 +3751,9 @@ async function responderOcorrenciaDesafio(timeout=false) {
     });
 
     desafioRespostaSelecionada = null;
+    desafioPrioridadeSelecionada = null;
+    desafioAcaoSelecionada = null;
+    desafioAlvoSelecionado = null;
 
     const btnResponder = document.getElementById('challenge-answer-btn');
     if (btnResponder) btnResponder.disabled = true;
@@ -3519,18 +3772,19 @@ async function responderOcorrenciaDesafio(timeout=false) {
   }
 }
 
-function mostrarFeedbackDesafio({correta, timeout, delta, pontosAntes, pontosDepois, indice}) {
+function mostrarFeedbackDesafio({correta, timeout, parcial, delta, pontosAntes, pontosDepois, indice}) {
   const el = document.getElementById('challenge-feedback');
   if (!el) return;
 
   const indiceSeguro = Math.max(0, Number(indice) || 0);
   el.dataset.indice = String(indiceSeguro);
   el.hidden = false;
-  el.className = 'challenge-feedback ' + (correta ? 'is-correct' : 'is-wrong');
+  el.className = 'challenge-feedback ' + (correta ? 'is-correct' : (parcial ? 'is-partial' : 'is-wrong'));
 
   const titulo = correta
     ? 'ACERTO'
-    : (timeout ? 'TEMPO ESGOTADO' : 'DECISÃO INCORRETA');
+    : (parcial ? 'RESPOSTA PARCIAL'
+      : (timeout ? 'TEMPO ESGOTADO' : 'DECISÃO INCORRETA'));
   const sinal = delta > 0 ? '+' : '';
 
   el.innerHTML = `<strong>${titulo}</strong><span>${sinal}${delta} pontos</span><small>${pontosAntes} pts → ${pontosDepois} pts</small>`;

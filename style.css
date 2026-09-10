@@ -2285,6 +2285,35 @@ html,body { max-width:100%; overflow-x:hidden; }
 .challenge-feedback.is-correct strong,.challenge-feedback.is-correct span{color:#5fe0a5}
 .challenge-feedback.is-wrong{border-color:#9b3944}
 .challenge-feedback.is-wrong strong,.challenge-feedback.is-wrong span{color:#ff7d89}
+.challenge-feedback.is-partial{border-color:#f59e0b}
+.challenge-feedback.is-partial strong,.challenge-feedback.is-partial span{color:#fbbf24}
+
+/* REPASSE — rodadas práticas (parâmetros e missão no mapa) */
+.challenge-param-group{margin-bottom:6px}
+.challenge-param-label{display:block;font-size:10px;letter-spacing:.12em;font-weight:900;color:#8fb6d2;margin-bottom:8px}
+.challenge-param-opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px}
+.challenge-param-seg{border:1px solid rgba(255,255,255,.14);background:#132735;color:#eef6fb;border-radius:10px;padding:11px 10px;font-weight:800;font-size:12px;cursor:pointer;transition:all .15s ease;text-align:center}
+.challenge-param-seg:hover{filter:brightness(1.15)}
+.challenge-param-seg.is-amber{border-color:rgba(245,158,11,.4)}
+.challenge-param-seg.is-orange{border-color:rgba(249,115,22,.45)}
+.challenge-param-seg.is-red{border-color:rgba(239,68,68,.5)}
+.challenge-param-seg.is-amber.selected{background:rgba(245,158,11,.22);outline:2px solid #f59e0b}
+.challenge-param-seg.is-orange.selected{background:rgba(249,115,22,.22);outline:2px solid #f97316}
+.challenge-param-seg.is-red.selected{background:rgba(239,68,68,.22);outline:2px solid #ef4444}
+.challenge-param-seg.is-action.selected{background:rgba(56,189,248,.18);outline:2px solid #8fd1ff}
+.challenge-param-hint{font-size:11px;color:#8ea2b3;text-align:center;margin:8px 0 0}
+
+.challenge-map-wrap{margin-top:6px}
+.challenge-map{display:block;width:100%;height:auto;background:#071019;border:1px solid rgba(255,255,255,.1);border-radius:12px}
+.challenge-track{fill:none;stroke:#1c3350;stroke-width:2.5}
+.challenge-target{cursor:pointer}
+.challenge-train-body{fill:#7dd3fc;stroke:#38bdf8;stroke-width:1}
+.challenge-signal-body{fill:#1b3350;stroke:#64748b;stroke-width:1}
+.challenge-signal-lamp{fill:#f59e0b}
+.challenge-target:hover .challenge-train-body{filter:brightness(1.25)}
+.challenge-target.selected .challenge-train-body{fill:#fbbf24;stroke:#f59e0b;stroke-width:2}
+.challenge-target.selected .challenge-signal-body{stroke:#f59e0b;stroke-width:2}
+.challenge-map-hint{margin-top:12px;font-size:12px;color:#b9c8d2;text-align:center;font-weight:600}
 /* ==========================================================================
    DESTROÇO DO TREM — efeito pós-descarrilamento (Módulo 4)
    ========================================================================== */
