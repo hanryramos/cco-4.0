@@ -3095,6 +3095,7 @@ let desafioRespostaSelecionada = null;
 let desafioPrioridadeSelecionada = null;
 let desafioAcaoSelecionada = null;
 let desafioAlvoSelecionado = null;
+let desafioTutorialIndice = null;
 let desafioTimer = null;
 let desafioRenderIndex = -1;
 const DESAFIO_PERCENTUAL = 0.20;
@@ -3115,6 +3116,7 @@ function abrirPainelDesafio() {
 }
 
 function fecharPainelDesafio() {
+  fecharTutorialPraticaDesafio();
   const dlg = document.getElementById('challenge-dialog');
   if (!dlg) return;
   try { if (dlg.open) dlg.close(); } catch(e) {}
@@ -3122,6 +3124,7 @@ function fecharPainelDesafio() {
 }
 
 function mostrarSubviewDesafio(tipo) {
+  if (tipo !== 'active') fecharTutorialPraticaDesafio();
   const views = {
     list: document.getElementById('challenge-list-view'),
     invite: document.getElementById('challenge-invite-view'),
@@ -3261,6 +3264,7 @@ function gerarSequenciaDesafio() {
 
 async function enviarDesafio(uidDesafiado) {
   if (!uidDesafiado || uidDesafiado === firebaseOperatorKey) return;
+  desafioTutorialIndice = null;
   try {
     const alvoSnap = await window.ccoFirebase.db.ref(`operadores/${uidDesafiado}`).once('value');
     const alvo = alvoSnap.val();
@@ -3381,6 +3385,7 @@ function instalarListenerDesafio(id) {
 
 async function responderConviteDesafio(aceitar) {
   if (!desafioAtualId) return;
+  desafioTutorialIndice = null;
   const ref = window.ccoFirebase.db.ref(`game/desafios/${desafioAtualId}`);
   if (!aceitar) {
     await ref.update({status:'rejected', encerradoEm: firebase.database.ServerValue.TIMESTAMP});
@@ -3531,6 +3536,58 @@ function renderMissaoPraticaDesafio(options, occ) {
   });
 }
 
+function mostrarTutorialPraticaDesafio(occ, indice) {
+  fecharTutorialPraticaDesafio();
+  const isParam = occ.tipo === 'parametros';
+  const passos = isParam ? [
+    'Leia a ocorrência e defina a PRIORIDADE correta: MODERADO, GRAVE ou CRÍTICO.',
+    'Escolha a RESPOSTA OPERACIONAL adequada (Monitorar, Supervisionar, Restringir ou Bloquear).',
+    'Quando os dois parâmetros estiverem marcados, clique em CONFIRMAR DECISÃO.'
+  ] : [
+    'Leia a instrução e identifique o elemento certo no mapa: um trem ou um sinal.',
+    'Clique nele para selecionar — o elemento fica destacado com um anel.',
+    'Depois clique em CONFIRMAR DECISÃO para executar a ação.'
+  ];
+  const dica = isParam
+    ? 'Acertar os dois parâmetros rende pontos cheios; acertar apenas um rende pontuação parcial.'
+    : 'Escolha com cuidado: clicar no elemento errado conta como erro.';
+
+  const div = document.createElement('div');
+  div.className = 'challenge-tutorial';
+  div.setAttribute('role', 'dialog');
+  div.setAttribute('aria-label', 'Mini-tutorial da rodada prática');
+  div.innerHTML = `
+    <div class="challenge-tutorial-card">
+      <span class="challenge-tutorial-kicker">⚡ MINI-TUTORIAL · RODADA PRÁTICA</span>
+      <h3>${escapeHtmlDesafio(occ.titulo)}</h3>
+      <p class="challenge-tutorial-lead">${isParam ? 'Ajuste os parâmetros antes de confirmar a decisão.' : 'Execute a ação clicando no elemento correto do mapa.'}</p>
+      <ol class="challenge-tutorial-steps">${passos.map(s => `<li>${escapeHtmlDesafio(s)}</li>`).join('')}</ol>
+      <p class="challenge-tutorial-tip">${escapeHtmlDesafio(dica)}</p>
+      <button type="button" class="challenge-tutorial-cta" onclick="iniciarRodadaPraticaDesafio(${Number(indice)})">ENTENDI, COMEÇAR</button>
+    </div>`;
+  document.body.appendChild(div);
+
+  // Timer só começa depois que o operador entender a mecânica da rodada.
+  if (desafioTimer) { clearInterval(desafioTimer); desafioTimer = null; }
+  const timerEl = document.getElementById('challenge-card-timer');
+  if (timerEl) timerEl.textContent = '— s';
+}
+
+function iniciarRodadaPraticaDesafio(indice) {
+  const el = document.querySelector('.challenge-tutorial');
+  if (el) el.remove();
+  if (desafioRenderIndex !== Number(indice)) {
+    desafioRenderIndex = Number(indice);
+    iniciarTimerDesafio(desafioAtual, Number(indice));
+  }
+}
+
+function fecharTutorialPraticaDesafio() {
+  const el = document.querySelector('.challenge-tutorial');
+  if (el) el.remove();
+  if (desafioTimer) { clearInterval(desafioTimer); desafioTimer = null; }
+}
+
 function renderizarDesafioAtivo(d) {
   const souA = d.desafianteUid === firebaseOperatorKey;
   const meuUid = firebaseOperatorKey;
@@ -3592,7 +3649,12 @@ function renderizarDesafioAtivo(d) {
     renderOpcoesQuizDesafio(options, occ);
   }
 
-  if (desafioRenderIndex !== indice) {
+  // Rodadas práticas ganham um mini-tutorial antes do cronômetro começar.
+  const rodadaPratica = occ.tipo === 'pratica' || occ.tipo === 'parametros';
+  if (rodadaPratica && desafioTutorialIndice !== indice) {
+    desafioTutorialIndice = indice;
+    mostrarTutorialPraticaDesafio(occ, indice);
+  } else if (desafioRenderIndex !== indice) {
     desafioRenderIndex = indice;
     iniciarTimerDesafio(d, indice);
   }
