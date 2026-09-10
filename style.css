@@ -1640,6 +1640,9 @@ body:has(#mod-cco-center.active) .control-panel {
 
 /* O cabeçalho/navegação fica fora do bloqueio para permitir trocar de aba. */
 .header-section { position: relative; z-index: 100000; }
+
+/* Enquanto o login está aberto, esconde a barra (nome/pontos/abas) para não dar spoilers. */
+body.pre-login .header-section { display: none !important; }
 #operator-block-modal {
   width: min(500px, 92vw);
   padding: 34px 36px 30px;

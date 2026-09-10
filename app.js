@@ -2021,6 +2021,7 @@
     gameState.isAdmin = false;
     const modalLogin = document.getElementById('game-login-modal');
     if (modalLogin) modalLogin.style.display = 'none';
+    document.body.classList.remove('pre-login');
 
     const adminPanel = document.getElementById('admin-control-panel');
     if (adminPanel) adminPanel.style.display = 'none';
