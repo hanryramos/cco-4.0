@@ -2009,12 +2009,12 @@
     } catch (e) { /* localStorage indisponível */ }
 
     if (ehAdmin) {
-      // Administradores acessam a Central ADM pelo botão "Entrar como Administrador",
+      // Administradores acessam a Central ADM pelo botão "ACESSAR COMO ADM",
       // sem redirecionamento automático a partir do login operacional (evita duplo login).
       if (btnLogar) btnLogar.disabled = false;
       if (btnLabel) btnLabel.textContent = 'ACESSAR SIMULADOR';
       if (btnSpinner) btnSpinner.hidden = true;
-      mostrarErroLogin("E-mail de administrador reconhecido. Use o botão 'Entrar como Administrador' abaixo para acessar a Central ADM.", emailInput);
+      mostrarErroLogin("E-mail de administrador reconhecido. Use o botão 'ACESSAR COMO ADM' abaixo para acessar a Central ADM.", emailInput);
       return;
     }
 

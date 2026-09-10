@@ -671,110 +671,18 @@
     /* Modal de Login */
     .game-modal-overlay {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(3, 7, 18, 0.9);
-      backdrop-filter: blur(8px);
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent;
       z-index: 10000;
       display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .game-modal-card {
-      background: #0f172a;
-      border: 1px solid #1e293b;
-      border-radius: 12px;
-      width: 420px;
-      max-width: 90%;
-      padding: 24px;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
-      color: #f8fafc;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .game-modal-card h2 {
-      font-size: 1.4rem;
-      color: #38bdf8;
-      display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
-      margin: 0;
-      letter-spacing: 0.08em;
+      overflow: hidden;
     }
 
-    .game-input-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      text-align: left;
-    }
-
-    .game-input-group label { font-size: 0.85rem; color: #94a3b8; }
-
-    .game-input-group input {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 6px;
-      padding: 10px;
-      color: #fff;
-      font-size: 0.95rem;
-      outline: none;
-    }
-
-    .game-input-group input:focus { border-color: #38bdf8; }
-
-    .btn-game-primary {
-      width: 100%;
-      background: #0284c7;
-      color: #fff;
-      border: none;
-      padding: 12px;
-      border-radius: 6px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-game-primary:hover { background: #0369a1; }
-    .btn-game-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-
-    .game-login-divider {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin: 16px 0 12px;
-      color: #51637b;
-      font-size: 10px;
-      font-weight: 900;
-      letter-spacing: 1.4px;
-      text-transform: uppercase;
-    }
-    .game-login-divider::before,
-    .game-login-divider::after { content: ""; flex: 1; height: 1px; background: #1b2a3d; }
-
-    .btn-game-admin {
-      width: 100%;
-      background: transparent;
-      border: 1px dashed rgba(56, 189, 248, .45);
-      color: #7dd3fc;
-      padding: 11px;
-      border-radius: 6px;
-      font-weight: 800;
-      font-size: 12px;
-      letter-spacing: .4px;
-      cursor: pointer;
-      transition: all .2s ease;
-    }
-    .btn-game-admin:hover { background: rgba(56, 189, 248, .08); border-style: solid; border-color: #38bdf8; color: #e0f2fe; transform: translateY(-1px); }
-    .btn-game-admin:active { transform: translateY(0) scale(.985); }
-
-    /* Background temático da tela de login */
+    /* -- Pano de fundo: ferrovia em perspectiva + vinheta de contraste -- */
     .game-login-bg {
       position: absolute;
       inset: 0;
@@ -782,30 +690,40 @@
       pointer-events: none;
     }
 
+    .login-scene-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .login-scene-vignette {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(120% 90% at 50% 42%, rgba(6, 12, 24, 0.25) 0%, rgba(2, 6, 16, 0.55) 55%, rgba(1, 4, 10, 0.85) 100%),
+        linear-gradient(180deg, rgba(2, 6, 16, 0.4) 0%, transparent 32%, rgba(2, 6, 16, 0.55) 100%);
+    }
+
     .game-login-rail {
       position: absolute;
       left: 50%;
-      bottom: -5%;
-      width: 1400px;
-      height: 250px;
-      margin-left: -700px;
-      background:
-        radial-gradient(ellipse at center, rgba(56, 189, 248, 0.12) 0%, transparent 70%),
-        repeating-linear-gradient(90deg,
-          transparent 0 52px,
-          rgba(56, 189, 248, 0.15) 52px 54px,
-          transparent 54px 70px);
-      border-radius: 50%;
-      transform: perspective(600px) rotateX(18deg);
+      bottom: -6%;
+      width: 150%;
+      height: 220px;
+      transform: translateX(-50%);
+      background: radial-gradient(50% 100% at 50% 50%, rgba(56, 189, 248, 0.1) 0%, transparent 70%);
+      pointer-events: none;
     }
 
     .game-login-train {
       position: absolute;
       left: -120px;
-      bottom: 6%;
-      font-size: 44px;
-      filter: drop-shadow(0 0 14px rgba(56, 189, 248, 0.9));
-      animation: gameLoginTrain 22s linear infinite;
+      bottom: 5%;
+      z-index: 2;
+      font-size: 42px;
+      filter: drop-shadow(0 0 16px rgba(56, 189, 248, 0.95));
+      animation: gameLoginTrain 24s linear infinite;
     }
 
     @keyframes gameLoginTrain {
@@ -813,43 +731,139 @@
       100% { left: 105vw; }
     }
 
-    .game-modal-card {
-      position: relative;
-      z-index: 2;
-    }
-
-    .game-login-logo {
+    /* -- Identidade no topo/centro: símbolo + CCO 4.0 + tag -- */
+    .login-brand {
+      position: absolute;
+      top: 5.5vh;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 3;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      gap: 10px;
-      font-size: 1.5rem;
-      letter-spacing: 0.04em;
-      color: #e2e8f0;
+      gap: 4px;
+      text-align: center;
+      animation: loginBrandIn 0.9s cubic-bezier(.16, 1, .3, 1) both;
     }
 
-    .game-login-logo-icon { font-size: 1.7rem; }
+    .login-vale-mark {
+      width: 46px;
+      height: 46px;
+      margin-bottom: 6px;
+      filter: drop-shadow(0 0 14px rgba(190, 215, 255, 0.35));
+    }
 
-    .game-login-logo em {
+    .login-brand-name {
+      font-family: 'Segoe UI', 'Poppins', system-ui, sans-serif;
+      font-size: 2.6rem;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      color: #f8fafc;
+      line-height: 1;
+    }
+
+    .login-brand-name em {
       font-style: normal;
       color: #38bdf8;
+      text-shadow: 0 0 18px rgba(56, 189, 248, 0.65), 0 0 42px rgba(56, 189, 248, 0.35);
+    }
+
+    .login-brand-tag {
+      margin-top: 8px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.42em;
+      text-transform: uppercase;
+      color: #7dd3fc;
+      text-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+    }
+
+    @keyframes loginBrandIn {
+      from { opacity: 0; transform: translate(-50%, -18px); }
+      to   { opacity: 1; transform: translate(-50%, 0); }
+    }
+
+    /* -- Card de login: glassmorphism azul-marinho -- */
+    .game-modal-card {
+      position: relative;
+      z-index: 4;
+      width: 420px;
+      max-width: 92%;
+      padding: 26px 28px 20px;
+      border-radius: 18px;
+      background: linear-gradient(165deg, rgba(13, 25, 45, 0.82), rgba(5, 10, 22, 0.88));
+      border: 1px solid rgba(56, 189, 248, 0.22);
+      box-shadow:
+        0 34px 70px -18px rgba(0, 0, 0, 0.8),
+        0 0 0 1px rgba(2, 8, 20, 0.55),
+        inset 0 1px 0 rgba(148, 197, 255, 0.14);
+      backdrop-filter: blur(14px) saturate(1.15);
+      -webkit-backdrop-filter: blur(14px) saturate(1.15);
+      color: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      animation: loginCardIn 0.8s cubic-bezier(.16, 1, .3, 1) 0.12s both;
+    }
+
+    .game-modal-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 10%;
+      right: 10%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.8), transparent);
+      pointer-events: none;
+    }
+
+    @keyframes loginCardIn {
+      from { opacity: 0; transform: translateY(26px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .game-modal-card h2 {
+      margin: 0;
+      font-size: 1.18rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-align: center;
+      color: #38bdf8;
+      text-shadow: 0 0 16px rgba(56, 189, 248, 0.35);
     }
 
     .game-login-subtitle {
-      margin: -6px 0 0;
-      font-size: 0.85rem;
-      color: #94a3b8;
+      margin: -4px 0 0;
+      font-size: 0.84rem;
+      color: #9db6d6;
       text-align: center;
+      line-height: 1.45;
     }
 
     .game-login-error {
       background: rgba(239, 68, 68, 0.12);
-      border: 1px solid rgba(239, 68, 68, 0.5);
-      border-radius: 6px;
+      border: 1px solid rgba(239, 68, 68, 0.45);
+      border-left: 3px solid #ef4444;
+      border-radius: 8px;
       color: #fecaca;
-      font-size: 0.85rem;
-      padding: 10px 12px;
+      font-size: 0.82rem;
+      padding: 9px 12px;
       line-height: 1.4;
+    }
+
+    .game-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      text-align: left;
+    }
+
+    .game-input-group label {
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      color: #8fb4d9;
+      text-transform: uppercase;
     }
 
     .game-input-wrap {
@@ -860,60 +874,156 @@
 
     .game-input-icon {
       position: absolute;
-      left: 11px;
+      left: 12px;
       font-size: 0.95rem;
-      opacity: 0.8;
+      opacity: 0.55;
       pointer-events: none;
     }
 
-    .game-input-wrap input {
+    .game-input-wrap input,
+    .game-input-group input {
       width: 100%;
-      padding-left: 38px;
-      padding-right: 96px;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 11px;
+      padding: 12px 14px;
+      padding-left: 40px;
+      color: #0f172a;
+      font-size: 0.95rem;
+      outline: none;
+      box-shadow: inset 0 1px 3px rgba(2, 8, 20, 0.12);
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
 
-    .game-input-wrap input.is-invalid { border-color: #ef4444; background: rgba(239, 68, 68, 0.06); }
+    .game-input-wrap input::placeholder,
+    .game-input-group input::placeholder {
+      color: #8494ab;
+      opacity: 1;
+    }
+
+    .game-input-wrap input:focus,
+    .game-input-group input:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25), inset 0 1px 3px rgba(2, 8, 20, 0.08);
+    }
+
+    .game-input-wrap input.is-invalid {
+      border-color: #ef4444;
+      background: #fff1f2;
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.18);
+    }
 
     .game-email-hint {
       position: absolute;
-      right: 8px;
-      background: rgba(56, 189, 248, 0.15);
-      color: #7dd3fc;
-      border: 1px solid rgba(56, 189, 248, 0.4);
-      border-radius: 5px;
-      padding: 4px 8px;
-      font-size: 0.78rem;
-      font-weight: 700;
+      right: 9px;
+      background: #e0f2fe;
+      color: #0369a1;
+      border: 1px solid #7dd3fc;
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 0.74rem;
+      font-weight: 800;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: background 0.2s, color 0.2s;
     }
 
-    .game-email-hint:hover { background: rgba(56, 189, 248, 0.3); }
+    .game-email-hint:hover { background: #bae6fd; color: #075985; }
 
     .game-remember {
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 0.82rem;
-      color: #94a3b8;
+      font-size: 0.8rem;
+      color: #9db6d6;
       cursor: pointer;
       user-select: none;
     }
 
     .game-remember input {
-      accent-color: #0284c7;
+      accent-color: #38bdf8;
       width: 15px;
       height: 15px;
       cursor: pointer;
     }
+
+    .btn-game-primary {
+      width: 100%;
+      background: linear-gradient(180deg, #0ea5e9, #0284c7);
+      color: #fff;
+      border: none;
+      padding: 14px 16px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 0.95rem;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      box-shadow: 0 10px 22px -8px rgba(2, 132, 199, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+      transition: all 0.22s ease;
+    }
+
+    .btn-game-primary:hover {
+      background: linear-gradient(180deg, #38bdf8, #0ea5e9);
+      transform: translateY(-2px);
+      box-shadow:
+        0 16px 30px -10px rgba(14, 165, 233, 0.85),
+        0 0 22px rgba(56, 189, 248, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-game-primary:active { transform: translateY(0) scale(0.99); }
+    .btn-game-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; filter: saturate(0.7); }
+
+    .game-login-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 2px 0 0;
+      color: #5677a3;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 1.6px;
+      text-transform: uppercase;
+    }
+
+    .game-login-divider::before,
+    .game-login-divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.35), transparent);
+    }
+
+    .btn-game-admin {
+      width: 100%;
+      background: transparent;
+      border: 1px solid rgba(56, 189, 248, 0.5);
+      color: #7dd3fc;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 0.8rem;
+      letter-spacing: 0.14em;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-game-admin:hover {
+      background: rgba(56, 189, 248, 0.1);
+      border-color: #38bdf8;
+      color: #e0f2fe;
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.25);
+    }
+
+    .btn-game-admin:active { transform: scale(0.99); }
 
     .game-login-status {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 7px;
-      font-size: 0.78rem;
-      color: #94a3b8;
+      font-size: 0.72rem;
+      color: #8fa8c8;
+      padding-top: 4px;
     }
 
     .game-status-dot {
@@ -921,11 +1031,12 @@
       height: 9px;
       border-radius: 50%;
       background: #64748b;
+      box-shadow: 0 0 8px rgba(100, 116, 139, 0.5);
     }
 
-    .game-status-dot.pending { background: #f59e0b; animation: gameStatusPulse 1.2s ease-in-out infinite; }
-    .game-status-dot.online  { background: #22c55e; }
-    .game-status-dot.offline { background: #ef4444; }
+    .game-status-dot.pending { background: #f59e0b; box-shadow: 0 0 10px rgba(245, 158, 11, 0.6); animation: gameStatusPulse 1.2s ease-in-out infinite; }
+    .game-status-dot.online  { background: #22c55e; box-shadow: 0 0 10px rgba(34, 197, 94, 0.6); }
+    .game-status-dot.offline { background: #ef4444; box-shadow: 0 0 10px rgba(239, 68, 68, 0.6); }
 
     @keyframes gameStatusPulse {
       0%, 100% { opacity: 1; }
@@ -936,7 +1047,7 @@
       display: inline-block;
       width: 16px;
       height: 16px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
+      border: 2px solid rgba(255, 255, 255, 0.35);
       border-top-color: #fff;
       border-radius: 50%;
       animation: gameBtnSpin 0.7s linear infinite;
@@ -944,8 +1055,24 @@
 
     @keyframes gameBtnSpin { to { transform: rotate(360deg); } }
 
+    /* Responsivo: celular */
+    @media (max-width: 700px) {
+      .login-brand { top: 4vh; }
+      .login-brand-name { font-size: 2.1rem; }
+      .login-vale-mark { width: 38px; height: 38px; }
+      .game-modal-card {
+        width: 90%;
+        max-width: 90%;
+        padding: 22px 20px 18px;
+        border-radius: 16px;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
+    }
+
     @media (max-width: 480px) {
-      .game-modal-card { width: 100%; max-width: 100%; border-radius: 0; }
+      .login-brand-tag { letter-spacing: 0.3em; }
+      .game-modal-card h2 { font-size: 1.05rem; }
     }
 
     /* Floating Cards Container & Cards */

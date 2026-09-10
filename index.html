@@ -7,19 +7,104 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
-  <link rel="stylesheet" href="style.css?v=15">
+  <link rel="stylesheet" href="style.css?v=16">
   <link rel="stylesheet" href="mobile.css?v=1">
 </head>
 <body>
 <!-- Modal Login -->
 <div class="game-modal-overlay" id="game-login-modal">
   <div class="game-login-bg" aria-hidden="true">
+    <svg class="login-scene-svg" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+        <linearGradient id="lgSky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#04060d"/>
+          <stop offset="0.55" stop-color="#0a1526"/>
+          <stop offset="0.72" stop-color="#0e2036"/>
+        </linearGradient>
+        <linearGradient id="lgGround" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#0c1626"/>
+          <stop offset="1" stop-color="#05080f"/>
+        </linearGradient>
+        <radialGradient id="lgHorizon" cx="0.5" cy="0" r="1">
+          <stop offset="0" stop-color="#38bdf8" stop-opacity="0.30"/>
+          <stop offset="0.5" stop-color="#1d4ed8" stop-opacity="0.10"/>
+          <stop offset="1" stop-color="#1d4ed8" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="lgRail" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#d3e6fb" stop-opacity="0.95"/>
+          <stop offset="1" stop-color="#5f83ad" stop-opacity="0.7"/>
+        </linearGradient>
+      </defs>
+
+      <rect width="1200" height="700" fill="url(#lgSky)"/>
+
+      <g fill="#dbeafe" opacity="0.7">
+        <circle cx="180" cy="60" r="1.4"/>
+        <circle cx="340" cy="120" r="1"/>
+        <circle cx="520" cy="45" r="1.2"/>
+        <circle cx="760" cy="90" r="1.3"/>
+        <circle cx="940" cy="40" r="1"/>
+        <circle cx="1080" cy="140" r="1.5"/>
+        <circle cx="700" cy="30" r="1"/>
+        <circle cx="250" cy="185" r="0.9"/>
+        <circle cx="1020" cy="205" r="1.1"/>
+      </g>
+
+      <rect y="380" width="1200" height="320" fill="url(#lgGround)"/>
+      <ellipse cx="600" cy="390" rx="430" ry="215" fill="url(#lgHorizon)"/>
+
+      <g stroke="#38bdf8" opacity="0.07" fill="none">
+        <path d="M600 390 L-70 700"/>
+        <path d="M600 390 L130 700"/>
+        <path d="M600 390 L300 700"/>
+        <path d="M600 390 L450 700"/>
+        <path d="M600 390 L750 700"/>
+        <path d="M600 390 L900 700"/>
+        <path d="M600 390 L1070 700"/>
+        <path d="M600 390 L1270 700"/>
+      </g>
+
+      <polygon points="588,390 612,390 1060,700 140,700" fill="#0d1a2c" opacity="0.92"/>
+
+      <g stroke="#aec8e8" opacity="0.28" stroke-width="6" stroke-linecap="round">
+        <line x1="537" y1="389.5" x2="663" y2="389.5"/>
+        <line x1="502" y1="397.6" x2="698" y2="397.6"/>
+        <line x1="467" y1="409.7" x2="733" y2="409.7"/>
+        <line x1="427" y1="428.1" x2="773" y2="428.1"/>
+        <line x1="388" y1="451.6" x2="812" y2="451.6"/>
+        <line x1="348" y1="480.3" x2="852" y2="480.3"/>
+        <line x1="308" y1="514" x2="892" y2="514"/>
+        <line x1="269" y1="553" x2="931" y2="553"/>
+        <line x1="229" y1="596.9" x2="971" y2="596.9"/>
+        <line x1="194" y1="640.2" x2="1006" y2="640.2"/>
+        <line x1="168" y1="675.2" x2="1032" y2="675.2"/>
+        <line x1="150" y1="700" x2="1050" y2="700"/>
+      </g>
+
+      <path d="M588 390 L140 700" stroke="url(#lgRail)" stroke-width="3" fill="none"/>
+      <path d="M612 390 L1060 700" stroke="url(#lgRail)" stroke-width="3" fill="none"/>
+      <path d="M588 390 L140 700" stroke="#eaf4ff" stroke-width="1.4" fill="none" opacity="0.85"/>
+      <path d="M612 390 L1060 700" stroke="#eaf4ff" stroke-width="1.4" fill="none" opacity="0.85"/>
+
+      <polygon points="600,505 470,700 730,700" fill="#38bdf8" opacity="0.08"/>
+      <polygon points="600,505 525,700 675,700" fill="#7dd3fc" opacity="0.07"/>
+    </svg>
+
+    <div class="login-scene-vignette"></div>
     <div class="game-login-rail"></div>
     <div class="game-login-train">🚂</div>
   </div>
+
+  <header class="login-brand" aria-hidden="true">
+    <svg class="login-vale-mark" viewBox="0 0 64 64" aria-hidden="true">
+      <path d="M32 7 54 55 H42 L32 34 L22 55 H10 Z" fill="#ffffff"/>
+    </svg>
+    <div class="login-brand-name">CCO <em>4.0</em></div>
+    <div class="login-brand-tag">PLATAFORMA INTEGRADA</div>
+  </header>
+
   <div class="game-modal-card">
-    <div class="game-login-logo"><span class="game-login-logo-icon">🎮</span><strong>CCO <em>4.0</em></strong></div>
-    <h2>ACESSO OPERACIONAL</h2>
+    <h2>ACESSO OPERACIONAL CCO 4.0</h2>
     <p class="game-login-subtitle">Informe seu e-mail corporativo para ingressar na simulação.</p>
 
     <div id="game-login-error" class="game-login-error" role="alert" hidden></div>
@@ -28,7 +113,7 @@
       <label for="game-user-email">E-mail Corporativo Vale:</label>
       <div class="game-input-wrap">
         <span class="game-input-icon">✉️</span>
-        <input type="email" id="game-user-email" placeholder="nome.sobrenome" autocomplete="email" spellcheck="false" autofocus />
+        <input type="email" id="game-user-email" placeholder="nome.sobrenome@vale.com" autocomplete="email" spellcheck="false" autofocus />
         <button type="button" id="game-email-hint" class="game-email-hint" hidden>@vale.com ↵</button>
       </div>
     </div>
@@ -46,7 +131,7 @@
     <div class="game-login-divider"><span>ou</span></div>
 
     <button type="button" class="btn-game-admin" id="game-login-admin" onclick="window.location.href='admin_game_v2.html'">
-      👨‍💼 Entrar como Administrador
+      ACESSAR COMO ADM
     </button>
 
     <div class="game-login-status" id="game-login-status">
@@ -587,6 +672,6 @@
 <script src="firebase-config.js?v=6"></script>
 
 <!-- LÓGICA JAVASCRIPT DA APLICAÇÃO -->
-<script src="app.js?v=14"></script>
+<script src="app.js?v=15"></script>
 </body>
 </html>
