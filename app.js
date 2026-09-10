@@ -3961,3 +3961,35 @@ inicializarSincronizacaoFirebase = async function() {
   await _inicializarSincronizacaoFirebaseOriginal();
   if (firebaseOperatorKey) iniciarMonitoramentoDesafios();
 };
+
+// -- Locomotiva da tela de login: percorre o trilho em perspectiva (horizonte -> canto inferior direito). --
+(function animarTremLogin() {
+  const loco = document.getElementById('login-loco');
+  if (!loco || loco.dataset.tremIniciado === '1') return;
+  loco.dataset.tremIniciado = '1';
+
+  const DUR = 46000;
+  const P0 = [605, 390, 0.06];
+  const P1 = [1068, 700, 1.06];
+  const GLOW_RAIL_ANGLE = 34.7;
+  const smooth = t => t * t * (3 - 2 * t);
+  const inicio = performance.now();
+  const p = loco.parentNode;
+
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    loco.setAttribute('transform', 'translate(845,558) scale(.52) rotate(34.7)');
+    return;
+  }
+
+  function frame(now) {
+    if (!document.getElementById('login-loco')) { p && p.remove(); return; }
+    const t = ((now - inicio) % DUR) / DUR;
+    const q = smooth(t);
+    const x = P0[0] + (P1[0] - P0[0]) * q;
+    const y = P0[1] + (P1[1] - P0[1]) * q;
+    const s = P0[2] + (P1[2] - P0[2]) * q;
+    loco.setAttribute('transform', `translate(${x.toFixed(1)},${y.toFixed(1)}) scale(${s.toFixed(4)}) rotate(${GLOW_RAIL_ANGLE})`);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();

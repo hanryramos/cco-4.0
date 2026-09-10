@@ -716,19 +716,18 @@
       pointer-events: none;
     }
 
-    .game-login-train {
-      position: absolute;
-      left: -120px;
-      bottom: 5%;
-      z-index: 2;
-      font-size: 42px;
-      filter: drop-shadow(0 0 16px rgba(56, 189, 248, 0.95));
-      animation: gameLoginTrain 24s linear infinite;
+    /* Sinalizador (beacon) do teto da locomotiva de login */
+    .login-beacon {
+      animation: loginBeacon 1.5s steps(2, start) infinite;
     }
 
-    @keyframes gameLoginTrain {
-      0%   { left: -120px; }
-      100% { left: 105vw; }
+    @keyframes loginBeacon {
+      0%, 62% { opacity: 1; }
+      78%, 100% { opacity: 0.12; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .login-beacon { animation: none; opacity: 1; }
     }
 
     /* -- Identidade no topo/centro: símbolo + CCO 4.0 + tag -- */
