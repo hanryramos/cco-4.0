@@ -3574,7 +3574,10 @@ function mostrarTutorialPraticaDesafio(occ, indice) {
       <p class="challenge-tutorial-tip">${escapeHtmlDesafio(dica)}</p>
       <button type="button" class="challenge-tutorial-cta" onclick="iniciarRodadaPraticaDesafio(${Number(indice)})">ENTENDI, COMEÇAR</button>
     </div>`;
-  document.body.appendChild(div);
+  // Dentro do <dialog> (showModal fica no top layer): o overlay precisa ser anexado
+  // ao próprio diálogo para ficar acima do card do desafio.
+  const destino = document.getElementById('challenge-dialog') || document.body;
+  destino.appendChild(div);
 
   // Timer só começa depois que o operador entender a mecânica da rodada.
   if (desafioTimer) { clearInterval(desafioTimer); desafioTimer = null; }
